@@ -5,7 +5,6 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.colors import LinearSegmentedColormap, to_rgb
 from scipy.sparse import coo_matrix, lil_matrix
 import seaborn as sns
-import numpy as np
 
 from itertools import chain
 from typing import Union, Type, Tuple, TYPE_CHECKING
@@ -13,7 +12,8 @@ from typing import Union, Type, Tuple, TYPE_CHECKING
 from collections import defaultdict
 
 if TYPE_CHECKING:
-      from GrammaticalEvolutionTools.GridBasedTools import GridWorld, GridWorldObject, GridPosition
+      from grammaticalevolutiontools.grid_based_tools import \
+        GridWorld, GridWorldObject
 
 
 # -- Type Annotations --

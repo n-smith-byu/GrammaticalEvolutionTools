@@ -1,6 +1,7 @@
-from GrammaticalEvolutionTools.Programs.CustomNodes.BasicNodes import NonTerminalNode, TerminalNode
-import numpy as np
+from grammaticalevolutiontools.programs.nodes.basic_nodes import NonTerminalNode, TerminalNode
 from abc import abstractmethod
+import numpy as np
+
 
 class CodeNode(NonTerminalNode):
     def __init__(self):
