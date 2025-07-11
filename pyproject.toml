@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "grammaticalevolutiontools"
+version = "0.1.0"
+description = "This package contains several tools for quickly setting up worlds and agents for Grammatical Evolution Projects."
+authors = ["Nick Smith <nicholas.smith0014@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "grammaticalevolutiontools", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+numpy = ">=2.2.4,<3.0.0"
+matplotlib = ">=3.10.1,<4.0.0"
+seaborn = ">=0.13.2,<0.14.0"
+sphinx = ">=8.2.3,<9.0.0"
+
+[tool.poetry.group.dev.dependencies]
+sphinx = "^8.2.3"
+sphinx-rtd-theme = "^3.0.2"
+numpydoc = "^1.9.0"
+pytest = "^8.4.1"
+pytest-mock = "^3.14.1"
+
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+notebook = "^7.4.4"
+tqdm = "^4.67.1"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
