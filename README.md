@@ -4,7 +4,6 @@
 [![Version](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/n-smith-byu/grammaticalevolutiontools)
 [![GitHub License](https://img.shields.io/badge/License-MIT-green)](https://github.com/n-smith-byu/GrammaticalEvolutionTools/blob/main/LICENSE)
 
-
 ---
 
 ## Table of Contents
@@ -19,7 +18,6 @@
 * [Examples](#examples)
 * [Running Tests](#running-tests)
 * [Documentation](#documentation)
-* [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
 
