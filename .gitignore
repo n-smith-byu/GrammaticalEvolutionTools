@@ -1,0 +1,24 @@
+# Ignore the build directory (generated files)
+docs/build/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment directories
+.venv/
+*.poetry.toml
+
+# Ignore IDE-specific files
+.vscode/
+
+# Ignore playground
+*.ipynb_checkpoints
+
+*.egg-info/
+
+*.zip
+
+*.pytest_cache/
