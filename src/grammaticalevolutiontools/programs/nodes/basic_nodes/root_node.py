@@ -25,9 +25,6 @@ class RootNode(NonTerminalNode):
         return super()._custom_init()
     
     # - - - -
-    
-    def add_child(self, child_node):
-        return NonTerminalNode.add_child(self, child_node, index=0)
 
     def get_next_child(self):
         if self._curr_child < 0:

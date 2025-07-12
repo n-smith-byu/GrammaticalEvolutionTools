@@ -53,7 +53,7 @@ class NonTerminalNode(ProgramNode):
     
     def replace_child(self, index, new_child):
         self._assert_not_running()
-        return ProgramNode.replace_child(self, new_child)
+        return ProgramNode.replace_child(self, index, new_child)
     
     def pop_child(self, index):
         self._assert_not_running()
