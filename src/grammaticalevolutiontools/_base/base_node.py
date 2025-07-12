@@ -271,9 +271,9 @@ class BaseNode(metaclass=BaseNodeMeta):
                       new_child: 'BaseNode') -> 'BaseNode':
         old_child = self.pop_child(index)
         try:
-            self.add_child(new_child, index)
+            self.add_child(new_child, index=index)
         except TypeError as e:
-            self.add_child(old_child, index)
+            self.add_child(old_child, index=index)
             raise e
 
         return old_child
@@ -342,7 +342,7 @@ class BaseNode(metaclass=BaseNodeMeta):
 
         for index, child in enumerate(other.children):
             if child is not None:
-                BaseNode.add_child(self, child.copy(), index)
+                type(self).add_child(self, child.copy(), index=index)
             else:
                 self._children[index] = None
     

@@ -16,6 +16,7 @@ __pycache__/
 
 # Ignore playground
 *.ipynb_checkpoints
+test.ipynb
 
 *.egg-info/
 

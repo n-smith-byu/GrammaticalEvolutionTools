@@ -225,9 +225,9 @@ class ProgramTree:
         
         # if no replacement node specified, replace randomly
         if new_node is ProgramTree.RANDOM_REPLACEMENT:
-            old = parent_node.pop_child(index)     # will get randomly replaced when tree is filled out
+            parent_node.pop_child(index)     # will get randomly replaced when tree is filled out
         else:
-            old = parent_node.replace_child(index, new_node)
+            parent_node.replace_child(index, new_node)
 
         self._fill_out_program()        # ensure program is complete
 
@@ -356,6 +356,9 @@ class ProgramTree:
             of the current program's structure.
         """
         return ProgramTree(root = self._root.copy())
+    
+    def nodes_iter(self):
+        return iter(self._nodes)
         
     @property
     def agent(self) -> 'Agent':
@@ -430,6 +433,10 @@ class ProgramTree:
             return ProgramTree.Status.RUNNING
         else:
             return ProgramTree.Status.EXITED
+        
+    @property
+    def root(self):
+        return self._root
     
     def __str__(self):
         """Returns a string representation of the program tree.
