@@ -6,9 +6,9 @@ import random
 from typing import Type, Tuple
 
 
-def pick_compatible_nodes(program1:ProgramTree, program2:ProgramTree, 
+def pick_compatible_nodes(program1: ProgramTree, program2: ProgramTree, 
         exclude: list[Type[ProgramNode]] = None, 
-        allow_children_of_root: bool = True
+        exclude_children_of_roots: bool = False
         ) -> Tuple[ProgramNode, ProgramNode]:
     """
     Pick two compatible nodes from different program trees that can be swapped.
@@ -22,9 +22,9 @@ def pick_compatible_nodes(program1:ProgramTree, program2:ProgramTree,
     exclude : list of Type, optional
         List of node types (and their subclasses) to exclude from selection.
         Default is None (no exclusions beyond root nodes).
-    allow_children_of_root : bool, optional
+    exclude_children_of_roots : bool, optional
         If True, prevents selecting both nodes as direct children of their
-        respective root nodes. Default is True.
+        respective root nodes. Default is False.
     
     Returns
     -------
@@ -37,52 +37,57 @@ def pick_compatible_nodes(program1:ProgramTree, program2:ProgramTree,
     Root nodes are always excluded from selection. Terminal nodes are
     typically excluded as swapping them provides no benefit.
     """
-
-    possible_node1s = program1.nodes_iter()
     
+    incompatible_types = tuple(exclude or [])
+    
+    # Get all eligible node types from program1 (excluding root and incompatible types)
+    eligible_types = set()
+    program2_types = program2.node_types
+    
+    for node_type in program1.types_iter():
+        if not issubclass(node_type, incompatible_types) \
+            and node_type in program2_types:
+            eligible_types.add(node_type)
+    
+    # if no matching types, return None, None
+    if not eligible_types:
+        return None, None
+    
+    # attempt to pick a matching type
     nodes_picked = False
-    incompatible = exclude or []
+    possible_node1s = None
 
     while not nodes_picked:
-        incompatible_types = tuple(incompatible) 
-
-        # filter remaining possible nodes from program1 to exclude 
-        # any new incompatible types
-        possible_node1s = [
-            node for node in possible_node1s if ( \
-                node is not program1.root and \
-                not issubclass(type(node), incompatible_types)
-            )
-        ]
+        possible_node1s = [node for node in (possible_node1s or program1.node_iter()) \
+                           if type(node) in eligible_types \
+                            and node is not program1._root]
         
-        if len(possible_node1s) == 0:       # if no remaining possible nodes
+        if not possible_node1s:
             return None, None
-        
-        # choose a random node from program1 possible nodes
+    
+        # choose a random node from program1
         node1 = random.choice(possible_node1s)
-        node1_is_not_child_of_root = node1 not in program1.root._children
+        node1_child_of_root = node1._parent is program1.root
 
-        # Create a list of eligible nodes from program2
-        # optionally exclude children of root if node1 
-        # is also a child of program1 root
-        possible_node2s = [
-            node for node in program2.nodes_iter() if ( \
-                node is not program2.root and \
-                (allow_children_of_root or \
-                    node1_is_not_child_of_root or \
-                    node not in program2.root._children) and \
-                type(node) == type(node1)
-            )
-        ]
-        if len(possible_node2s) == 0:           # if no compatible nodes from program2, 
-            incompatible.append(type(node1))    # pick a different node1
+        # get a possible list of nodes from program2
+        possible_node2s = [node for node in program2.node_iter(type=type(node1)) \
+                           if type(node) == type(node1) \
+                            and node is not program2._root \
+                            and (not exclude_children_of_roots \
+                                 or not node1_child_of_root \
+                                 or node._parent is not program2.root) \
+                            ]
+        
+        # if no matches, remove the type and try again
+        if not possible_node2s:
+            eligible_types.remove(type(node1))
             continue
 
-        # randomly choose a node from the possible program2 nodes
+        # once a compatible type is found, choose node2
         node2 = random.choice(possible_node2s)
+        
         nodes_picked = True
 
-    # return a tuplw with the matching pair
     return node1, node2
 
 
@@ -124,7 +129,7 @@ def cross_over(program1: ProgramTree, program2: ProgramTree) -> list[ProgramTree
     # from being swapped with each other (root nodes excluded automatically)
     node1, node2 = pick_compatible_nodes(
         program1, program2, exclude=[TerminalNode],
-        allow_children_of_root=False
+        exclude_children_of_roots=True
     )
     
     if not node1 or not node2:      # if no match was found

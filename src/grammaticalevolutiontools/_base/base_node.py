@@ -326,6 +326,7 @@ class BaseNode(metaclass=BaseNodeMeta):
             )
 
         node_set.add(self)
+        self._on_collect_descendants()
 
         for child in self._children:
             if child is not None:
@@ -365,6 +366,10 @@ class BaseNode(metaclass=BaseNodeMeta):
                     return False
         
         return True
+    
+    def _on_collect_descendants(self):
+        pass    # hook for subclasses to add behavior
+                # when collecting descendants
                 
     def _on_set_depth(self):
         pass   # hook for subclasses to set additional properties
