@@ -167,9 +167,16 @@ class ProgramNode(BaseNode):
         self._parent: ProgramNode
 
     def _set_program(self, program: 'ProgramTree'):
+        if program and self._program:
+            raise ValueError("Cannot set program while already part of another program.")
+        
+        old_program = self._program
         self._program = program
-        if self._program and self._depth > self._program.depth:
-            self._program._depth = self._depth
+    
+        if self._program:
+            self._program._mark_nodes_dirty()
+        if old_program:
+            old_program._mark_nodes_dirty()
 
         for child in self._children:
             if isinstance(child, ProgramNode):
@@ -178,21 +185,21 @@ class ProgramNode(BaseNode):
     def _clear_program(self):
         self._set_program(None)
 
-    def _on_set_depth(self):
-        self.__temp = self._program and (self._program, self._program._depth)
-        self._program = self._parent and self._parent._program
-
-    def _on_set_depth_rollback(self):
-        self._program, self._program._depth = self.__temp
-        self.__temp = None
+    def _on_collect_descendants(self):
+        if self._program:
+            if self._depth > self._program._max_child_depth:
+                self._program._max_child_depth = self._depth
+        
+            self._program._nodes_by_type[type(self)].add(self)
 
 
     # - - Public Methods - -
 
     def add_child(self, new_child: 'ProgramNode', index = None):
-        if new_child._program is not None:
+        if new_child._program:
             raise ValueError("new_child must not be part of another program.")
         index = BaseNode.add_child(self, new_child, index)
+
         try:
             new_child._set_program(self._program)
         except ValueError as e:
@@ -200,13 +207,12 @@ class ProgramNode(BaseNode):
             self.num_children -= 1
             raise e
         
-    def pop_child(self, index):
+    def pop_child(self, index) -> 'ProgramNode':
         child: ProgramNode = BaseNode.pop_child(self, index)
-        self._program._depth = None        # program depth now unknown
-
         if isinstance(child, BaseNode):
             child._clear_program()
-
+        
+        return child
 
     # - - Properties - -
 

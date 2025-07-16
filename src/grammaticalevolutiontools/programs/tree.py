@@ -1,6 +1,7 @@
 from .nodes.basic_nodes import NonTerminalNode, RootNode, ExecutableNode
 from .nodes import ProgramNode
 
+from collections import defaultdict
 from enum import IntEnum
 import random
 
@@ -77,7 +78,9 @@ class ProgramTree:
         """
         self._root: 'RootNode' = root
         self._nodes: set['ProgramNode'] = set()
-        self._depth = None       # depth calculated lazily, only when needed.
+        self._nodes_by_type: dict[type, set['ProgramNode']] = defaultdict(set)
+        self._nodes_dirty = True  # Track if node collection needs update
+        self._max_child_depth = None       # depth calculated lazily, only when needed.
         self._agent = agent
         self._program_stack: list['ProgramNode'] = []
 
@@ -97,7 +100,11 @@ class ProgramTree:
         """
         self._agent = agent
 
-    def _collect_nodes(self) -> set:
+    def _mark_nodes_dirty(self):
+        """Mark the node collection as needing an update."""
+        self._nodes_dirty = True
+
+    def _collect_nodes(self):
         """Collects all nodes in the program tree and updates the internal `_nodes` set.
 
         This method typically starts from the :py:attr:`~.ProgramTree._root` and
@@ -109,7 +116,16 @@ class ProgramTree:
         set of ProgramNode
             A set containing all :py:class:`~.nodes.ProgramNode` instances within the tree.
         """
+        if not self._nodes_dirty:
+            return self._nodes
+            
+        self._max_child_depth = -1
+        self._nodes_by_type.clear()
+
         self._nodes = self._root.collect_descendants()
+        self._nodes_dirty = False
+
+        return self._nodes
 
     def _fill_out_program(self):
         """Recursively fills out the program tree by adding random children to incomplete nodes.
@@ -147,11 +163,30 @@ class ProgramTree:
                 child_node = child_node_class()
 
                 queue.append(child_node)
-                self._nodes.add(child_node)
                 curr_node.add_child(child_node)
+
+        # Mark nodes as dirty since we added new ones
+        self._mark_nodes_dirty()
+
 
 
     # - - User Methods - - 
+
+    def get_nodes_by_type(self, node_type: type) -> set['ProgramNode']:
+        """Get all nodes of a specific type.
+        
+        Parameters
+        ----------
+        node_type : type
+            The type of nodes to retrieve.
+            
+        Returns
+        -------
+        set of ProgramNode
+            A set of all nodes of the specified type.
+        """
+        self._collect_nodes()  # Ensure nodes are up to date
+        return self._nodes_by_type.get(node_type, set()).copy()
 
     def get_parent_of_node(self, node: 'ProgramNode') -> Tuple['ProgramNode', int]:
         """Retrieves the parent node and the child index of a given node.
@@ -357,8 +392,16 @@ class ProgramTree:
         """
         return ProgramTree(root = self._root.copy())
     
-    def nodes_iter(self):
-        return iter(self._nodes)
+    def node_iter(self, type: Type[ProgramNode]=None):
+        self._collect_nodes()  # Ensure nodes are up to date
+        if not type:
+            return iter(self._nodes)
+        else:
+            return iter(self._nodes_by_type[type])
+    
+    def types_iter(self):
+        self._collect_nodes()
+        return iter(self._nodes_by_type)  
         
     @property
     def agent(self) -> 'Agent':
@@ -380,6 +423,7 @@ class ProgramTree:
         int
             The count of all :py:class:`~.nodes.ProgramNode` instances, including the root.
         """
+        self._collect_nodes()  # Ensure nodes are up to date
         return len(self._nodes)
     
     @property
@@ -394,27 +438,29 @@ class ProgramTree:
         set of ProgramNode
             A set of all :py:class:`~.nodes.ProgramNode` objects comprising the tree.
         """
+        self._collect_nodes()  # Ensure nodes are up to date
         return set(node for node in self._nodes)
+    
+    @property
+    def node_types(self) -> Set[Type['ProgramNode']]:
+        self._collect_nodes()
+        return set(self._nodes_by_type)   
     
     @property
     def depth(self) -> int:
         """The maximum depth of the program tree.
 
         The depth is calculated lazily (only when first accessed) and cached.
-        The depth of a tree with only a root node is 0.
+        The depth of a tree with only a root node is 1. And empty tree has a depth of 0.
 
         Returns
         -------
         int
-            The maximum depth of any node within the tree, where the root is at depth 0.
+            The number of layers in the tree. 
         """
-        if self._depth is None:
-            if len(self._nodes) == 0:
-                self._depth = 0
-            else:
-                self._depth = max([node._depth for node in self._nodes])
-        
-        return self._depth
+        self._collect_nodes()  # This will update _max_child_depth
+        return self._max_child_depth + 1 if self._max_child_depth is not None else 0
+    
     
     @property
     def status(self):
