@@ -9,7 +9,7 @@ class SequentialNode(NonTerminalNode):
             self, token: str, 
             num_children: int, 
             possible_children: Union[list, dict[int, list[Type[ProgramNode]]]],
-            label: str = None):
+            label: str = ''):
         
         # Can either pass in a dict specifying the possible 
         # children at each index 

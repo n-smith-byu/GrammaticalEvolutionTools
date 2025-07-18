@@ -61,8 +61,8 @@ exclude_patterns = []
 napoleon_google_docstring = False  # Keep False if primarily using NumPy style
 napoleon_numpy_docstring = True    # Set to True for NumPy-style docstrings
 napoleon_include_init_with_doc = False # Usually handled by autodoc if __init__ has a docstring
-napoleon_include_private_with_doc = True # Set to True to document private members (e.g., _my_method)
-napoleon_include_special_with_doc = True # Set to True to document special methods (e.g., __str__)
+napoleon_include_private_with_doc = False # Set to True to document private members (e.g., _my_method)
+napoleon_include_special_with_doc = False # Set to True to document special methods (e.g., __str__)
 napoleon_use_admonition_for_examples = False
 napoleon_use_admonition_for_notes = False
 napoleon_use_admonition_for_references = False
@@ -100,3 +100,5 @@ intersphinx_mapping = {
 # If you enable 'sphinx.ext.todo', you can use the .. todo:: directive.
 # Setting todo_include_todos to True will display the content of these directives.
 todo_include_todos = True
+
+toc_object_entries = False

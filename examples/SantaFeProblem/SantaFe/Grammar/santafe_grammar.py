@@ -161,7 +161,7 @@ with Grammar() as SantaFeGrammar:
         def _base_node_init(self):
             super()._base_node_init(
                 token='<FoodCondition>',
-                condition_string='if_food_ahead',
+                label='if_food_ahead',
                 possible_children_true=['ProgsNode'],
                 possible_children_false=['ProgsNode'],
                 factor_possible_vals=[
@@ -187,7 +187,7 @@ with Grammar() as SantaFeGrammar:
         def _base_node_init(self):
             super()._base_node_init(
                 token='<WallCondition>',
-                condition_string='if_wall_ahead',
+                label='if_wall_ahead',
                 possible_children_true=['ProgsNode'],
                 possible_children_false=['ProgsNode'],
                 factor_possible_vals=[

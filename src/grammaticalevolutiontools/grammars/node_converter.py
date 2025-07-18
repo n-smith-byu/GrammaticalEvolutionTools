@@ -1,6 +1,6 @@
 from .grammar_node import GrammarNode
 from ..programs.nodes import ProgramNode
-from .._base import InheritingNodeMeta
+from .._base_node import InheritingNodeMeta
 
 from typing import Type
 
