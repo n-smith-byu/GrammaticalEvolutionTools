@@ -8,34 +8,70 @@ import random
 from typing import Type, Union, Tuple, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    
     from ..agents import Agent
     
+    
 class ProgramTree:
-    """Represents a runnable program composed of interconnected nodes.
+    """Represents a program as a hierarchical tree structure of interconnected nodes.
 
-    This class manages the structure and execution flow of a program.
-    It provides capabilities for program generation, execution, and
-    can be optionally attached to an external agent for interaction.
+    This class provides the foundational framework for managing and
+    executing a program defined by a hierarchical arrangement of
+    :py:class:`~.nodes.ProgramNode` objects. It tracks the program's
+    state, its constituent nodes, and facilitates interactions
+    with an optional :py:class:`~.agents.Agent`.
+
+    Parameters
+    ----------
+    root : RootNode or Type[RootNode]
+        The root node of the program tree, serving as the entry point
+        for program execution.
+
+    Attributes
+    ----------
+    _root : ~.nodes.basic_nodes.RootNode
+        The root node of the tree. This serves as the entry point for program
+        execution and acts as the anchor for the entire tree structure.
+    _nodes : set of ~.nodes.ProgramNode
+        A set containing all unique :py:class:`~.nodes.ProgramNode` objects
+        within the tree. This provides a fast lookup mechanism for any node
+        in the program tree.
+    _nodes_by_type : dict[type, set[~.nodes.ProgramNode]]
+        A dictionary that organizes nodes by their type. Each key is a
+        :py:class:`type` object (e.g., ``ConditionNode``, ``ActionNode``),
+        and its corresponding value is a :py:class:`set` of all
+        :py:class:`~.nodes.ProgramNode` instances of that specific type present
+        in the tree. This facilitates quick access to nodes based on their class.
+    _nodes_dirty : bool
+        A flag indicating whether the internal node collections
+        (:py:attr:`._nodes`, :py:attr:`._nodes_by_type`) need to be
+        re-scanned and updated. This is typically set to :py:obj:`True`
+        after structural changes to the tree.
+    _max_child_depth : int or None
+        The maximum depth of the tree (number of levels below the root).
+        This value is calculated lazily, meaning it's computed only when
+        first requested after a potential change. It is :py:obj:`None`
+        if not yet calculated or if the tree is empty.
+    _agent : ~.agents.Agent or None
+        The agent instance to which this program is attached, if any.
+        If an agent is provided during initialization, this attribute
+        holds a reference to it, enabling program-agent interactions.
+    _program_stack : list of ~.nodes.ProgramNode
+        An internal list used to manage the execution flow of the program.
+        This acts as a call stack for program nodes during traversal or execution.
+
     """
 
-    RANDOM_REPLACEMENT = 'Random'
-    
-    class Status(IntEnum):
-        """An enumeration representing the execution status of a program."""
-        EXITED = 0
-        """The program has finished execution."""
-        RUNNING = 1
-        """The program is currently executing."""
+    # - - Exceptions - - 
 
     class ProgramInProgressError(RuntimeError):
-        """Exception raised when an operation is attempted on a program that is currently running."""
+        """Exception raised when program modification is attempted while the program is currently running."""
         pass
 
     class NodeMissingChildError(RuntimeError):
         """Exception raised when a program encounters a node that is missing a child.
 
-        This typically indicates an incomplete program structure.
+        This typically indicates an `incomplete` program structure
+        or a bug in the tree generation/modification logic.
         """
         pass
 
@@ -44,13 +80,31 @@ class ProgramTree:
         pass
 
     class BoundToAgentError(RuntimeError):
-        """Exception raised for operations requiring the program to be unbound from an agent when it is not."""
+        """Exception raised for attempted operations requiring the program to be unbound from an agent when it is not."""
         pass
+
+    # - - Constants - - 
+
+    RANDOM_REPLACEMENT = 'Random'
+    """A sentinel value used with :py:meth:`~.ProgramTree.replace_node`
+    to indicate that a node should be replaced by a randomly generated branch.
+    """
+    
+    class Status(IntEnum):
+        """An enumeration representing the execution status of a program."""
+        EXITED = 0
+        """The program has finished execution."""
+        RUNNING = 1
+        """The program is currently executing."""
 
     # - - Initialization - - 
 
-    def __init__(self, root: 'RootNode', agent:'Agent' = None):
-        """Initializes a ProgramTree instance.
+    def __init__(self, root: Union[RootNode, Type[RootNode]]):
+        """Initializes a ProgramTree instance with a root node and an optional agent.
+
+        This constructor sets up the fundamental structure of the program tree,
+        establishing the root node and preparing internal data structures for
+        node management and program execution.
 
         Parameters
         ----------
@@ -64,27 +118,25 @@ class ProgramTree:
         Notes
         -----
         Internal attributes (prefixed with `_`) are managed by the class and
-        typically not intended for direct external access. These include:
+        typically not intended for direct external access. They may be accessed by 
+        subclasses, however. 
 
-        * `_root` (:py:class:`~.nodes.basic_nodes.RootNode`): The root node of the tree.
-        * `_nodes` (:py:class:`set` of :py:class:`~.nodes.ProgramNode`): A set of all nodes in the tree for quick lookup.
-        * `_depth` (:py:class:`int` or :py:class:`None`): The maximum depth of the tree, calculated lazily.
-        * `_agent` (:py:class:`~.agents.Agent` or :py:class:`None`): The agent instance, if attached.
-        * `_program_stack` (:py:class:`list` of :py:class:`~.nodes.ProgramNode`): Used internally to manage program execution flow.
-
-        The :py:meth:`~.nodes.ProgramNode.set_tree` method (called on the root) establishes a bidirectional link,
-        and :py:meth:`~.ProgramTree._fill_out_program` is an internal method
-        to build the initial tree structure based on the root.
+        For setting up the initial tree, the :py:meth:`~.ProgramTree.__init__`
+        constructor establishes a bidirectional link between the root node
+        and the program tree via :py:meth:`~.nodes.ProgramNode._set_program`.
+        It then calls :py:meth:`~.ProgramTree._fill_out_program` to recursively
+        discover and register all nodes reachable from the root, populating the
+        tree's initial structure and internal node collections.
         """
-        self._root: 'RootNode' = root
+        self._root: 'RootNode' = root() if isinstance(root, type) else root
         self._nodes: set['ProgramNode'] = set()
         self._nodes_by_type: dict[type, set['ProgramNode']] = defaultdict(set)
-        self._nodes_dirty = True  # Track if node collection needs update
-        self._max_child_depth = None       # depth calculated lazily, only when needed.
-        self._agent = agent
+        self._level_counts = defaultdict(int)   # keeps track of how many nodes on each level
+        self._max_node_depth = -1
+        self._agent = None
         self._program_stack: list['ProgramNode'] = []
 
-        self._root._set_program(self)
+        self._collect_nodes()
         self._fill_out_program()
 
     def _set_agent(self, agent: 'Agent'):
@@ -100,32 +152,41 @@ class ProgramTree:
         """
         self._agent = agent
 
-    def _mark_nodes_dirty(self):
-        """Mark the node collection as needing an update."""
-        self._nodes_dirty = True
+    def _cache_depth(self):
+        if not self._level_counts:
+            self._max_node_depth = -1
+        else:
+            self._max_node_depth = max(key for key in self._level_counts \
+                                        if self._level_counts[key] > 0)
 
     def _collect_nodes(self):
-        """Collects all nodes in the program tree and updates the internal `_nodes` set.
+        """Collects all nodes in the program tree and updates the internal node collections.
 
-        This method typically starts from the :py:attr:`~.ProgramTree._root` and
-        traverses the tree to discover all connected nodes using
-        :py:meth:`~.nodes.ProgramNode.collect_descendants`.
+        This internal method is responsible for traversing the tree from the
+        :py:attr:`~.ProgramTree._root` node to discover all connected nodes.
+        It populates the :py:attr:`~.ProgramTree._nodes` set and
+        :py:attr:`~.ProgramTree._nodes_by_type` dictionary. It also
+        calculates the maximum depth of the tree and stores it in
+        :py:attr:`~.ProgramTree._max_child_depth`.
+
+        This method is called lazily by properties and methods that rely on
+        up-to-date node collections (e.g., :py:meth:`~.ProgramTree.size`,
+        :py:meth:`~.ProgramTree.depth`, :py:meth:`~.ProgramTree.get_nodes_by_type`).
+        It only performs the collection if the :py:attr:`~.ProgramTree._nodes_dirty`
+        flag is :py:obj:`True`.
 
         Returns
         -------
         set of ProgramNode
             A set containing all :py:class:`~.nodes.ProgramNode` instances within the tree.
         """
-        if not self._nodes_dirty:
-            return self._nodes
-            
-        self._max_child_depth = -1
+        self._nodes.clear()
         self._nodes_by_type.clear()
+        self._level_counts.clear()
 
-        self._nodes = self._root.collect_descendants()
-        self._nodes_dirty = False
-
-        return self._nodes
+        self._root._program = self
+        self._root.collect_descendants(reason='add')
+        self._cache_depth()
 
     def _fill_out_program(self):
         """Recursively fills out the program tree by adding random children to incomplete nodes.
@@ -135,66 +196,77 @@ class ProgramTree:
         a breadth-first-like traversal starting from existing incomplete nodes.
 
         Process:
-        1. Calls :py:meth:`~.ProgramTree._collect_nodes` to get all current nodes.
+        
+        1. Calls :py:meth:`~.ProgramTree._collect_nodes` to get all current nodes
+           and ensure node collections are up-to-date.
 
         2. Initializes a queue with all nodes that have fewer than their maximum
            number of children.
 
         3. Enters a loop that continues as long as the queue is not empty:
-            a. Dequeues a `curr_node`.
-            b. While `curr_node` still needs children:
-                i. Determines possible child node types and their probabilities
-                   using :py:meth:`~.nodes.ProgramNode.get_possible_children_and_probs`.
-                ii. Randomly selects a `child_node_class`.
-                iii. Creates an instance of the `child_node_class`.
-                iv. Adds the new child to the queue (if it might need children too).
-                v. Adds the new child to the `_nodes` set.
-                vi. Attaches the child to `curr_node` using :py:meth:`~.nodes.ProgramNode.add_child`.
+
+           a. Dequeues a `curr_node`.
+
+           b. While `curr_node` still needs children:
+
+              i. Determines possible child node types and their probabilities
+                 using :py:meth:`~.nodes.ProgramNode.get_possible_children_and_probs`.
+
+              ii. Randomly selects a `child_node_class`.
+
+              iii. Creates an instance of the `child_node_class`.
+
+              iv. Adds the new child to the queue (if it might need children too).
+
+              v. Attaches the child to `curr_node` using :py:meth:`~.nodes.ProgramNode.add_child`.
+                 This action is expected to update node relationships and potentially
+                 signal the tree that its node collections are now dirty.
         """
-        self._collect_nodes()
         queue = [node for node in self._nodes if node.num_children < node.max_num_children]
         
         while len(queue) > 0:
             curr_node: 'ProgramNode' = queue.pop(0)
             while curr_node.num_children < curr_node.max_num_children:
-                index = curr_node.num_children
-                possible_children, probs = curr_node.get_possible_children_and_probs(index)
-                child_node_class = random.choices(possible_children, probs, k=1)[0]
-                child_node = child_node_class()
+                for i, child in enumerate(curr_node._children):
+                    if not child:
+                        possible_children, probs = curr_node.get_possible_children_and_probs(i)
+                        child_node_class = random.choices(possible_children, probs, k=1)[0]
+                        child_node = child_node_class()
 
-                queue.append(child_node)
-                curr_node.add_child(child_node)
-
-        # Mark nodes as dirty since we added new ones
-        self._mark_nodes_dirty()
+                        queue.append(child_node)
+                        curr_node.add_child(child_node, index=i)
 
 
-
-    # - - User Methods - - 
+    # - - Public Methods - - 
 
     def get_nodes_by_type(self, node_type: type) -> set['ProgramNode']:
         """Get all nodes of a specific type.
-        
+
         Parameters
         ----------
         node_type : type
-            The type of nodes to retrieve.
-            
+            The :py:class:`type` of nodes to retrieve.
+            This should be a subclass of :py:class:`~.nodes.ProgramNode`.
+
         Returns
         -------
         set of ProgramNode
-            A set of all nodes of the specified type.
+            A set of all :py:class:`~.nodes.ProgramNode` instances of the specified type
+            found within the program tree. If no nodes of the type exist, an empty set is returned.
         """
-        self._collect_nodes()  # Ensure nodes are up to date
-        return self._nodes_by_type.get(node_type, set()).copy()
+        return self._nodes_by_type[node_type]
 
     def get_parent_of_node(self, node: 'ProgramNode') -> Tuple['ProgramNode', int]:
-        """Retrieves the parent node and the child index of a given node.
+        """Retrieves the parent node and the child index of a given node within this tree.
+
+        This method identifies the direct parent of the specified `node`
+        and returns its position (index) within that parent's children.
 
         Parameters
         ----------
         node : ProgramNode
-            The node for which to find the parent.
+            The node for which to find the parent. This node must be part of
+            the current :py:class:`~.ProgramTree`.
 
         Returns
         -------
@@ -206,7 +278,9 @@ class ProgramTree:
         Raises
         ------
         ValueError
-            If the provided node does not exist within this program tree.
+            If the provided `node` is not found within this program tree.
+            If the provided `node` is the :py:attr:`~.ProgramTree._root` node,
+            as the root has no parent.
         """
         if node not in self.nodes:
             raise ValueError('Node does not exist in tree')
@@ -218,13 +292,14 @@ class ProgramTree:
         """Replaces a specific node in the tree with another node or a randomly generated branch.
 
         If `new_node` is set to :py:attr:`~.ProgramTree.RANDOM_REPLACEMENT`, the
-        node will be replaced randomly, and a new complete branch will be generated
-        from that point.
+        node will be conceptually "removed" (its slot becomes empty) and then
+        subsequently filled in by a new complete randomly generated branch
+        during the call to :py:meth:`~.ProgramTree._fill_out_program`.
 
         Parameters
         ----------
         node : ProgramNode
-            The existing node in the tree to be replaced.
+            The existing :py:class:`~.nodes.ProgramNode` in the tree to be replaced.
         new_node : ProgramNode or str, optional
             The node to replace `node` with. Can be an instance of
             :py:class:`~.nodes.ProgramNode` or the string
@@ -236,23 +311,16 @@ class ProgramTree:
             If an attempt is made to replace the :py:attr:`~.ProgramTree._root` node.
             If the provided `node` is not part of this tree.
         ProgramTree.BoundToAgentError
-            If the program is currently bound to an agent. Modifications are disallowed.
+            If the program is currently :py:meth:`~.ProgramTree.bound_to_agent`.
+            Structural modifications are disallowed while bound to an agent.
         ProgramTree.ProgramInProgressError
-            If the program is currently :py:attr:`~.ProgramTree.running`. Modifications are disallowed.
+            If the program is currently :py:meth:`~.ProgramTree.running`.
+            Structural modifications are disallowed during execution.
         """
         if node is self._root:
             raise ValueError(
                 "Cannot Replace the Root Node in Tree. " 
                 "Try replacing a child node instead."
-            )
-        if self.bound_to_agent():
-            raise ProgramTree.BoundToAgentError(
-                "Cannot modify a program after it is bound to an agent."
-            )
-        if self.running():
-            raise ProgramTree.ProgramInProgressError(
-                "Cannot modify program while it is running. " \
-                "Please kill program or run it to completion first."
             )
 
         # get the parent of the node to replace and the node it is at
@@ -325,8 +393,10 @@ class ProgramTree:
     def kill(self):
         """Immediately stops the execution of the program and resets its state.
 
-        This clears the internal program stack and resets all nodes to their
-        initial state, making the program ready to be run again from the start.
+        This method clears the internal :py:attr:`~.ProgramTree._program_stack`
+        and calls :py:meth:`~.nodes.ProgramNode.reset` on the :py:attr:`~.ProgramTree._root`
+        node (which should propagate to all its descendants). This makes the
+        program ready to be run again from the start.
         """
         self._program_stack.clear()
         self._root.reset()
@@ -361,8 +431,8 @@ class ProgramTree:
         Returns
         -------
         bool
-            True if the program's :py:attr:`~.ProgramTree.status` is
-            :py:attr:`~.ProgramTree.Status.RUNNING`, False otherwise.
+            :py:obj:`True` if the program's :py:attr:`~.ProgramTree.status` is
+            :py:attr:`~.ProgramTree.Status.RUNNING`, :py:obj:`False` otherwise.
         """
         return self.status == ProgramTree.Status.RUNNING
         
@@ -372,17 +442,18 @@ class ProgramTree:
         Returns
         -------
         bool
-            True if an :py:class:`~.agents.Agent` instance is attached to the program,
-            False otherwise.
+            :py:obj:`True` if an :py:class:`~.agents.Agent` instance is attached to the program
+            (:py:attr:`~.ProgramTree._agent` is not :py:obj:`None`), :py:obj:`False` otherwise.
         """
         return self.agent is not None
         
     def copy(self) -> 'ProgramTree':
         """Creates a deep copy of the ProgramTree instance.
 
-        The new ProgramTree will have a deep copy of its
+        The new :py:class:`~.ProgramTree` will have a deep copy of its
         :py:attr:`~.ProgramTree._root` node and consequently all its
-        descendant nodes. The `_agent` attribute is NOT copied (it will be None).
+        descendant nodes. The :py:attr:`~.ProgramTree._agent` attribute is
+        NOT copied (it will be :py:obj:`None` in the new tree).
 
         Returns
         -------
@@ -393,14 +464,42 @@ class ProgramTree:
         return ProgramTree(root = self._root.copy())
     
     def node_iter(self, type: Type[ProgramNode]=None):
-        self._collect_nodes()  # Ensure nodes are up to date
+        """Returns an iterator over the nodes in the program tree.
+
+        If a `type` is specified, the iterator will yield only nodes
+        of that specific type. Otherwise, it iterates over all nodes
+        in the tree. The internal node collections are updated via
+        :py:meth:`~.ProgramTree._collect_nodes` before iteration if they are dirty.
+
+        Parameters
+        ----------
+        type : type of ProgramNode, optional
+            If provided, yields only nodes that are instances of this
+            specific :py:class:`~.nodes.ProgramNode` subclass.
+
+        Returns
+        -------
+        iterator
+            An iterator that yields :py:class:`~.nodes.ProgramNode` objects.
+        """
         if not type:
             return iter(self._nodes)
         else:
             return iter(self._nodes_by_type[type])
     
     def types_iter(self):
-        self._collect_nodes()
+        """Returns an iterator over all unique node types present in the program tree.
+
+        The internal node collections are updated via
+        :py:meth:`~.ProgramTree._collect_nodes` before iteration if they are dirty.
+
+        Returns
+        -------
+        iterator
+            An iterator that yields :py:class:`type` objects, representing
+            the classes of :py:class:`~.nodes.ProgramNode` instances found
+            within the tree.
+        """
         return iter(self._nodes_by_type)  
         
     @property
@@ -410,7 +509,8 @@ class ProgramTree:
         Returns
         -------
         Agent or None
-            The attached agent, or None if no agent is currently bound.
+            The attached :py:class:`~.agents.Agent` instance, or :py:obj:`None`
+            if no agent is currently bound.
         """
         return self._agent
     
@@ -418,49 +518,64 @@ class ProgramTree:
     def size(self) -> int:
         """The total number of nodes in the program tree.
 
+        The node collection is updated via :py:meth:`~.ProgramTree._collect_nodes`
+        if it is dirty before returning the size.
+
         Returns
         -------
         int
             The count of all :py:class:`~.nodes.ProgramNode` instances, including the root.
         """
-        self._collect_nodes()  # Ensure nodes are up to date
         return len(self._nodes)
     
     @property
     def nodes(self) -> Set['ProgramNode']:
         """A set containing all nodes in the program tree.
 
-        This property provides access to the internal set of nodes
-        for inspection or iteration.
+        This property provides access to a *copy* of the internal set of nodes
+        for inspection or iteration. Modifications to the returned set
+        will not affect the program tree's internal state.
+        The internal node collection is updated via :py:meth:`~.ProgramTree._collect_nodes`
+        if it is dirty before returning the set.
 
         Returns
         -------
         set of ProgramNode
             A set of all :py:class:`~.nodes.ProgramNode` objects comprising the tree.
         """
-        self._collect_nodes()  # Ensure nodes are up to date
-        return set(node for node in self._nodes)
+        return self._nodes.copy()
     
     @property
     def node_types(self) -> Set[Type['ProgramNode']]:
+        """A set containing all unique node types present in the program tree.
+
+        The internal node collections are updated via
+        :py:meth:`~.ProgramTree._collect_nodes` if they are dirty before returning.
+
+        Returns
+        -------
+        set of type of ProgramNode
+            A set of :py:class:`type` objects, representing the unique classes
+            of :py:class:`~.nodes.ProgramNode` instances found within the tree.
+        """
         self._collect_nodes()
         return set(self._nodes_by_type)   
     
     @property
-    def depth(self) -> int:
-        """The maximum depth of the program tree.
+    def height(self) -> int:
+        """The number of levels in the program tree.
 
-        The depth is calculated lazily (only when first accessed) and cached.
-        The depth of a tree with only a root node is 1. And empty tree has a depth of 0.
+        Calculated based on the :py:attr:`~.ProgramTree._max_child_depth`. 
+        A tree with no nodes will a height of 0. A tree with only a root node 
+        will have a height of 1. 
 
         Returns
         -------
         int
-            The number of layers in the tree. 
+            The number of levels in the tree. Returns 0 if the tree is considered empty
+            (e.g., if no nodes were collected for some reason).
         """
-        self._collect_nodes()  # This will update _max_child_depth
-        return self._max_child_depth + 1 if self._max_child_depth is not None else 0
-    
+        return self._max_node_depth + 1
     
     @property
     def status(self):
@@ -482,7 +597,20 @@ class ProgramTree:
         
     @property
     def root(self):
+        """The root node of the program tree.
+
+        This property provides direct access to the program's
+        :py:class:`~.nodes.basic_nodes.RootNode`, which serves as the
+        entry point and anchor of the tree structure.
+
+        Returns
+        -------
+        RootNode
+            The root :py:class:`~.nodes.basic_nodes.RootNode` of the program.
+        """
         return self._root
+    
+    # - - Magic Methods - - 
     
     def __str__(self):
         """Returns a string representation of the program tree.

@@ -1,4 +1,4 @@
-from grammaticalevolutiontools._base import BaseNodeMeta, InheritingNodeMeta
+from grammaticalevolutiontools._base_node import BaseNodeMeta, InheritingNodeMeta
 from ..Tools import BasicGrammar as bg
 
 from abc import abstractmethod

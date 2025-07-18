@@ -1,4 +1,4 @@
-from grammaticalevolutiontools._base import BaseNode
+from grammaticalevolutiontools._base_node import BaseNode
 
 import warnings
 import numpy as np

@@ -1,4 +1,4 @@
-from .._base import BaseNode
+from .._base_node import BaseNode
 
 import numpy as np
 from typing import Type, Optional, TYPE_CHECKING

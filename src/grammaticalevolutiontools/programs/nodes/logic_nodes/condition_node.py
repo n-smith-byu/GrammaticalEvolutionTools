@@ -14,8 +14,7 @@ class ConditionNode(NonTerminalNode):
     FALSE_IND = 1
 
     def _base_node_init(
-            self, token: str, 
-            condition_string: str, 
+            self, token: str, label: str, 
             possible_children_true: list[Type[ProgramNode]], 
             possible_children_false: list[Type[ProgramNode]], 
             t_child_probs: Optional[Probabilities] = None, 
@@ -35,7 +34,7 @@ class ConditionNode(NonTerminalNode):
         
         super()._base_node_init(
             token=token,
-            label=condition_string,
+            label=label,
             is_root=False,
             num_children=len(possible_children),
             possible_children=possible_children,

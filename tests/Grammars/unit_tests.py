@@ -40,7 +40,7 @@ with Grammar() as grammar:
         def _base_node_init(self):
             return super()._base_node_init(
                 token='<ConditionNode>',
-                condition_string='my_condition',
+                label='my_condition',
                 possible_children_true=['MySeqNode', 'MyConditionNode'],
                 possible_children_false=['MySeqNode', 'MyConditionNode'],
                 factor_possible_vals=[

@@ -49,7 +49,7 @@ class Agent(ABC):
         if program is None:
             # generate a new program
             root_node_type = type(self).get_default_program_root_type()
-            program = ProgramTree(root = root_node_type())
+            program = ProgramTree(root_node_type)
 
         self._set_program(program)
 
@@ -75,13 +75,11 @@ class Agent(ABC):
     def _assert_valid_program(self, program: ProgramTree):
         if not isinstance(program, ProgramTree):
             raise TypeError('program must be an instance of Program.')
-        if program.agent is not None:
-            raise RuntimeError(
+        if program.agent and program.agent is not self:
+            raise ValueError(
                 "Cannot bind program to this agent when program is already "
                 "bound to another agent. Unbind the program first."
                 )
-        if self._program is not None:
-            raise Agent.ProgramError('Agent already has a program.')
         
     # - - World Internal Access - -
 
@@ -101,15 +99,27 @@ class Agent(ABC):
 
     # - - Running Program - -
 
-    def execute_program(self):
+    def replace_program(self, new_program: ProgramTree) -> ProgramTree:
+        old = self._program
+        try:
+            self._set_program(new_program)
+        except (TypeError, ValueError) as e:
+            self._set_program(old)
+            raise e
+
+        return old
+
+    def copy_program(self):
+        return self._program.copy()
+
+    def execute_program(self, n=1):
         """
         Resets the program and runs to completion once.
         """
         if self._program.running():
             self._program.kill()
-        status = 1
-        while status:
-            status = self._program.tick()
+
+        self._program.run(n=n)
 
     def tick(self, loop: bool=True):
         """
@@ -125,6 +135,7 @@ class Agent(ABC):
 
     def give_reward(self, amount):
         self._score += amount
+
 
     # - - Listeners - -
 
@@ -158,9 +169,6 @@ class Agent(ABC):
         return self._world_class is not None
     
     # - - Other Methods - -
-    
-    def copy_program(self):
-        return self._program.copy()
     
     def __hash__(self):
         return hash(self._uuid)
