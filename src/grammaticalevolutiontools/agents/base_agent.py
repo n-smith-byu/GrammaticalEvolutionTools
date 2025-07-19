@@ -1,80 +1,62 @@
-from ..programs import ProgramTree
-from ..programs.nodes.basic_nodes import RootNode
+from ..programs import AgentProgramTree
 
-from abc import ABC, abstractmethod
+from numbers import Number
 from uuid import uuid4
 
-from typing import TYPE_CHECKING, Type
-from numbers import Number
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..worlds import World
 
-class Agent(ABC):
+class Agent:
+
+    # - - Exceptions - - 
 
     class WorldNotSetError(RuntimeError):
-        def __init__(self, msg):
-            super(Agent.WorldNotSetError, self).__init__(msg)
+        pass
 
-    class ProgramError(RuntimeError):
-        def __init__(self, msg):
-            super(Agent.ProgramError, self).__init__(msg)
+    class AlreadyInWorldError(RuntimeError):
+        pass
 
-    class AgentAlreadyInWorldError(AssertionError):
-        def __init__(self, msg):
-            super(Agent.AgentAlreadyInWorldError, self).__init__(msg)
+    class AssignedProgramError(RuntimeError):
+        pass
 
-    _world_class = None
+    class NotAssignedProgramError(RuntimeError):
+        pass
 
-    @classmethod
-    def valid_world_classes(cls) -> bool:
-        return NotImplemented
-    
-    @classmethod
-    @abstractmethod
-    def get_default_program_root_type(cls) -> Type[RootNode]:
-        "Must Return a subclass of AbstractProgramTree.Nodes.RootNode"
-        return NotImplemented
-    
     # - - Initialization - -
 
-    def __init__(self, program: ProgramTree = None):
-
+    def __init__(self, program: AgentProgramTree = None):
         self._world: World = None
-        self._score = 0
-        self._num_actions = 0
-        self._program: ProgramTree = None
+        self._program: AgentProgramTree = None
         self._uuid = uuid4()       # just to make hashable
 
-        if program is None:
-            # generate a new program
-            root_node_type = type(self).get_default_program_root_type()
-            program = ProgramTree(root_node_type)
+        self._score = 0
+        self._num_actions = 0
 
-        self._set_program(program)
-
-    def _set_program(self, program: ProgramTree):
-        self._assert_valid_program(program)
-
-        self._program = program
-        program._set_agent(self)
-
+        if program:
+            self._assert_valid_program(program)
+            self._set_program(program)
+        
     # - - Assertions - -
 
     def _assert_not_in_world(self):
         if self.assigned_to_world():
-            raise Agent.AgentAlreadyInWorldError(
+            raise Agent.AlreadyInWorldError(
                 "Cannot add agent to world because agent is already in another world. "
                 "Remove agent from that world first. "
                 )
         
-    def _assert_world_valid(self, world: 'World'):
-        if self._world_class and not isinstance(world, self._world_class):
-            raise TypeError("Attempting to add agent to an imcompatible world type.")
+    def _assert_not_assigned_program(self):
+        if self._program:
+            raise Agent.AssignedProgramError(
+                "Cannot set program when agent is already assigned a program. "
+                "Please remove old program first."
+            )
         
-    def _assert_valid_program(self, program: ProgramTree):
-        if not isinstance(program, ProgramTree):
-            raise TypeError('program must be an instance of Program.')
+    def _assert_valid_program(self, program):
+        if not isinstance(program, AgentProgramTree):
+            raise TypeError('program must be an instance of AgentProgramTree.')
         if program.agent and program.agent is not self:
             raise ValueError(
                 "Cannot bind program to this agent when program is already "
@@ -84,23 +66,26 @@ class Agent(ABC):
     # - - World Internal Access - -
 
     def _set_world(self, world: 'World'):
-        self._assert_world_valid(world)
         self._assert_not_in_world()
 
         self._world = world
 
-    def _reset(self):
-        if self._program.running():
-            self._program.kill()
+    # - - Helpers - - 
 
-        self._world = None
-        self._num_actions = 0
-        self._score = 0
+    def _set_program(self, program: AgentProgramTree):
+        self._program = program
+        if program: 
+            program._set_agent(self)
 
-    # - - Running Program - -
-
-    def replace_program(self, new_program: ProgramTree) -> ProgramTree:
-        old = self._program
+    def _remove_program(self) -> AgentProgramTree:
+        program = self._program
+        program._set_agent(None)
+        self._program = None
+        
+        return program
+    
+    def _replace_program(self, new_program: AgentProgramTree) -> AgentProgramTree:
+        old = self._remove_program()
         try:
             self._set_program(new_program)
         except (TypeError, ValueError) as e:
@@ -108,9 +93,24 @@ class Agent(ABC):
             raise e
 
         return old
+    
+    # - - Public - - 
+
+    def reset(self, program: AgentProgramTree = None):
+        if program:
+            self._assert_valid_program(program)
+            self._replace_program(program)
+
+        if self._program and self._program.running():
+            self._program.kill()
+        
+        self._num_actions = 0
+        self._score = 0
 
     def copy_program(self):
         return self._program.copy()
+
+    # - - Running Program - -
 
     def execute_program(self, n=1):
         """
@@ -130,12 +130,11 @@ class Agent(ABC):
             raise Agent.WorldNotSetError("Cannot run program without agent being assigned a world unless this is a worldless agent.")
 
         status = self._program.tick()
-        if status == ProgramTree.Status.EXITED and loop:
+        if status == AgentProgramTree.Status.EXITED and loop:
             self._program.tick()
 
     def give_reward(self, amount):
         self._score += amount
-
 
     # - - Listeners - -
 
@@ -153,7 +152,7 @@ class Agent(ABC):
         return self._world is not None
     
     @property
-    def program(self) -> ProgramTree:
+    def program(self) -> AgentProgramTree:
         return self._program
     
     @property
@@ -163,10 +162,6 @@ class Agent(ABC):
     @property
     def num_actions(self) -> int:
         return self._num_actions
-    
-    @property
-    def requires_world(self):
-        return self._world_class is not None
     
     # - - Other Methods - -
     

@@ -1,11 +1,11 @@
 from ..agents import Agent
-from ..programs import ProgramTree
+from ..programs import AgentProgramTree
 from .grid_world_object import GridWorldObject
 from .grid_position import GridPosition
 
 import numpy as np
 
-from typing import Type, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from numbers import Integral
 from enum import Enum
 
@@ -66,7 +66,7 @@ class GridBasedAgent(Agent):
     # - - Instance Definition - - #
     ###############################
 
-    def __init__(self, program: ProgramTree = None):
+    def __init__(self, program: AgentProgramTree = None):
         super(GridBasedAgent, self).__init__(program)
 
         self._world: 'GridWorld'

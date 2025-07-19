@@ -2,18 +2,14 @@ from grammaticalevolutiontools.programs.nodes import \
     basic_nodes, logic_nodes, factor_nodes
 from grammaticalevolutiontools.grammars import \
     Grammar, as_grammar_node
+from ..santafe_agent import SantaFeAgent
 
-from typing import Type, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 if TYPE_CHECKING:
-    from ..santafe_agent import SantaFeAgent
-
-RootNode = basic_nodes.RootNode
-ExecutableNode = basic_nodes.ExecutableNode
-SequentialNode = logic_nodes.SequentialNode
-ConditionNode = logic_nodes.ConditionNode
-RandIntegerNode = factor_nodes.RandIntegerNode
+    from grammaticalevolutiontools.programs import AgentProgramTree
 
 _MIN_SIGHT_RANGE = 1
 _MAX_SIGHT_RANGE = 3
@@ -58,7 +54,7 @@ General Notes and Reminders:
 """
 
 
-with Grammar() as SantaFeGrammar:
+with Grammar(min_compliant_agent=SantaFeAgent) as SantaFeGrammar:
     # CodeNode will be the root node for our SantaFe Grammar, so we inherit from the base RootNode
     # In our Grammar, <Code> always goes to <Progs>, so there is only one possible child.
     @as_grammar_node 
@@ -70,8 +66,6 @@ with Grammar() as SantaFeGrammar:
         def _custom_init(self):
             return super()._custom_init()
 
-            
-
     # ProgsNode is a NonTerminal node that has a single child
     #  - We inherit from SequentialNode since the logic for verifying and running child nodes is already there. 
     #  - We pass in 1 for the number of children into SequentialNode.__init__()
@@ -82,7 +76,7 @@ with Grammar() as SantaFeGrammar:
     #    size of the tree from exploding expentially. Therefore we overload get_possible_children_and_probs to make the 
     #    the probability of <Op> increase with depth. 
     @as_grammar_node
-    class ProgsNode(SequentialNode):
+    class ProgsNode(logic_nodes.SequentialNode):
         def _base_node_init(self):
             super()._base_node_init(
                 token="<Progs>",
@@ -102,12 +96,12 @@ with Grammar() as SantaFeGrammar:
             return super()._custom_init()
 
         def get_probs(self, index):
-            probs = SequentialNode.get_probs(self, index)   # cannot use super()
+            SeqNode = logic_nodes.SequentialNode
+            probs = SeqNode.get_probs(self, index)   # cannot use super()
             probs[-1] += max(0, self._depth) / 3
             probs = probs / np.sum(probs)
 
             return probs
-        
         
     # Progs2Node is a node that runs two ProgsNodes sequentially
     # - We inherit from SequentialNode and set num_children = 2
@@ -118,7 +112,7 @@ with Grammar() as SantaFeGrammar:
     # - since we are using the 'label' param and setting it to "progs2", this when printed this node will
     #   print as "progs2(<Child1>,<Child2>)"
     @as_grammar_node
-    class Progs2Node(SequentialNode):
+    class Progs2Node(logic_nodes.SequentialNode):
         def _base_node_init(self):
             super()._base_node_init(token="<Progs2>",
                                     label='Progs2',
@@ -127,12 +121,10 @@ with Grammar() as SantaFeGrammar:
         def _custom_init(self):
             return super()._custom_init()
 
-
     # Progs3Node is a node that runs three ProgsNodes sequentially
     # - See Definition for Progs2Node
     @as_grammar_node
-    class Progs3Node(SequentialNode):
-
+    class Progs3Node(logic_nodes.SequentialNode):
         def _base_node_init(self):
             super()._base_node_init(token="<Progs3>",
                                     label='Progs3',
@@ -141,7 +133,6 @@ with Grammar() as SantaFeGrammar:
         def _custom_init(self):
             return super()._custom_init()
         
-
 
     # The FoodConditionNode checks if food is within n spaces, directly in front of the agent and runs its 
     # first child if True, its second child if False. 
@@ -157,7 +148,7 @@ with Grammar() as SantaFeGrammar:
     #   The 'possible_factor_values' parameter takes a list of lists, where possible_factor_values[i] is a list of 
     #   possible_children for our ith factor. 
     @as_grammar_node
-    class FoodConditionNode(ConditionNode):
+    class FoodConditionNode(logic_nodes.ConditionNode):
         def _base_node_init(self):
             super()._base_node_init(
                 token='<FoodCondition>',
@@ -175,6 +166,7 @@ with Grammar() as SantaFeGrammar:
             )
         
         def condition(self) -> bool:
+            self._program: AgentProgramTree
             agent: SantaFeAgent = self._program.agent
             num_spaces: int = self._get_factor('dist').value
 
@@ -183,7 +175,7 @@ with Grammar() as SantaFeGrammar:
 
     # WallConditionNode checks if a wall is 
     @as_grammar_node
-    class WallConditionNode(ConditionNode):
+    class WallConditionNode(logic_nodes.ConditionNode):
         def _base_node_init(self):
             super()._base_node_init(
                 token='<WallCondition>',
@@ -200,13 +192,14 @@ with Grammar() as SantaFeGrammar:
                 factor_names=['dist'])
             
         def condition(self):
+            self._program: AgentProgramTree
             agent: SantaFeAgent = self._program.agent
             num_spaces: int = self._get_factor('dist').value
 
             return agent.wall_within(num_spaces)
         
     @as_grammar_node
-    class OperationNode(SequentialNode):
+    class OperationNode(logic_nodes.SequentialNode):
         def _base_node_init(self):
             super()._base_node_init(
                 token='<Op>',
@@ -231,7 +224,7 @@ with Grammar() as SantaFeGrammar:
     # -- Movement -- 
 
     @as_grammar_node
-    class TurnLeft(ExecutableNode):
+    class TurnLeft(basic_nodes.ExecutableNode):
         def _base_node_init(self):
             super()._base_node_init(token='Left')
 
@@ -239,11 +232,12 @@ with Grammar() as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
+            self._program: AgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.turn_left()
         
     @as_grammar_node
-    class TurnRight(ExecutableNode):
+    class TurnRight(basic_nodes.ExecutableNode):
         def _base_node_init(self):
             super()._base_node_init(token='Right')
 
@@ -251,11 +245,12 @@ with Grammar() as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
+            self._program: AgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.turn_right()
         
     @as_grammar_node
-    class MoveForward(ExecutableNode):
+    class MoveForward(basic_nodes.ExecutableNode):
         def _base_node_init(self):
             super()._base_node_init(token='Move')
 
@@ -263,13 +258,14 @@ with Grammar() as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
+            self._program: AgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.move_forward()
 
     # -- Numbers -- 
 
     @as_grammar_node
-    class RandDistNode(RandIntegerNode):
+    class RandDistNode(factor_nodes.RandIntegerNode):
         def _base_node_init(self):
             super()._base_node_init() 
 

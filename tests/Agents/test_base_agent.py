@@ -74,7 +74,7 @@ class TestBaseAgent:
         assert agent.assigned_to_world()
         assert agent._world is self.world
         
-        with pytest.raises(Agent.AgentAlreadyInWorldError):
+        with pytest.raises(Agent.AlreadyInWorldError):
             agent._set_world(bw.BasicWorld())
 
     def test_tick_no_loop(self, capsys: pytest.CaptureFixture):
@@ -169,7 +169,7 @@ class TestBaseAgent:
         agent.give_reward(10)
         agent.tick(loop=False)
 
-        agent._reset()
+        agent.reset()
 
         assert agent._world is None
         assert agent.num_actions == 0

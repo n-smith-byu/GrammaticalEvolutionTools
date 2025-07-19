@@ -37,11 +37,16 @@ def as_grammar_node(node_cls: Type[ProgramNode]):
                           "_ALL_POSSIBLE_CHILDREN"}
 
     # These are methods the user is allowed to override
-    overridable_methods = {"get_probs",
-                           "add_child",
-                           "replace_child",
+    overridable_methods = {"add_child",
                            "pop_child",
+                           "replace_child",
                            "remove_all_children",
+                           "_get_properties_to_pass_to_children",
+                           "_get_properties_for_removed_children",
+                           "_on_collect_descendants_add",
+                           "_on_collect_descendants_pop",
+                           "_rollback_add",
+                           "_rollback_pop"
                            "__str__",
                            "__repr__"}
     
