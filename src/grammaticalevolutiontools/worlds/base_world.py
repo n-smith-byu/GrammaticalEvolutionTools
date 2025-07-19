@@ -100,12 +100,12 @@ class World(ABC):
     
     @abstractmethod
     def tick(self):
-        raise NotImplementedError('tick not implemented in BaseWorld class.')
+        pass
 
     @abstractmethod
     def load_new_agents(self):
         """
         Resets the world with a new batch of agents.
         """
-        raise NotImplementedError("'load_new_agents' not implemented in BaseWorld class.")
+        pass
     

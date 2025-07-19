@@ -86,19 +86,6 @@ class ProgramNode(BaseNode):
     """
 
     SHOW_WARNINGS: bool = True
-    _program_tree_cls: Optional[Type['ProgramTree']] = None
-
-    @staticmethod
-    def import_program_tree():
-        """Lazily imports and caches the `ProgramTree` class.
-
-        This static method ensures that the `ProgramTree` class is only imported
-        when it's first needed, avoiding circular dependencies or unnecessary imports.
-        The imported class is stored in `ProgramNode._program_tree_cls`.
-        """
-        if not ProgramNode._program_tree_cls:
-            from ..tree import ProgramTree
-            ProgramNode._program_tree_cls = ProgramTree
 
     # - - - - - - - - - - - - - - -
 
@@ -205,21 +192,7 @@ class ProgramNode(BaseNode):
             warnings_ = ProgramNode.SHOW_WARNINGS
         )
 
-    # - - Modification Assertions - - 
 
-    def _assert_can_be_modified(self):
-        if self._program:
-            # if self._program.bound_to_agent():
-            #     raise ProgramTree.BoundToAgentError(
-            #         "Cannot modify nodes in a program after it is "
-            #         "bound to an agent."
-            #     )
-            if self._program.running():
-                raise ProgramTree.ProgramInProgressError(
-                    "Cannot modify nodes in a program while it is running. " \
-                    "Please kill the program or run it to completion first."
-                )
-        
     # - - Initialization Helpers - - 
 
     def _init_possible_children(self, possible_children_dict: dict,
@@ -530,7 +503,7 @@ class ProgramNode(BaseNode):
         IndexError
             If `index` is out of bounds or `max_num_children` is exceeded.
         """
-        self._assert_can_be_modified()
+        self._program._assert_editable()
 
         if new_child._program:
             raise ValueError("new_child must not be part of another program.")
@@ -543,7 +516,7 @@ class ProgramNode(BaseNode):
         return index
 
     def pop_child(self, index) -> 'ProgramNode':
-        self._assert_can_be_modified()
+        self._program._assert_editable()
 
         removed_node = BaseNode.pop_child(self, index)
 
@@ -554,14 +527,14 @@ class ProgramNode(BaseNode):
 
     # - - Overridden Methods - - 
 
-    def _get_properties_for_removed_child(self):
-        properties = BaseNode._get_properties_for_removed_child(self)
-        properties['_program'] = None
-        return properties
-
     def _get_properties_to_pass_to_children(self) -> dict[str, Any]:
         properties = BaseNode._get_properties_to_pass_to_children(self)
         properties['_program'] = self._program
+        return properties
+    
+    def _get_properties_for_removed_child(self):
+        properties = BaseNode._get_properties_for_removed_child(self)
+        properties['_program'] = None
         return properties
     
     def _on_collect_descendants_add(self):

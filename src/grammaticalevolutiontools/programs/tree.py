@@ -5,10 +5,7 @@ from collections import defaultdict
 from enum import IntEnum
 import random
 
-from typing import Type, Union, Tuple, Set, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..agents import Agent
+from typing import Type, Union, Tuple, Set
     
     
 class ProgramTree:
@@ -75,13 +72,24 @@ class ProgramTree:
         """
         pass
 
-    class MissingAgentError(RuntimeError):
-        """Exception raised when attempting to run a program not attached to an an agent."""
-        pass
+    # - - Assertions - - 
 
-    class BoundToAgentError(RuntimeError):
-        """Exception raised for attempted operations requiring the program to be unbound from an agent when it is not."""
-        pass
+    def _assert_root_valid(self):
+        if not isinstance(self._root, RootNode):
+            raise TypeError(
+                "Program root must be an instance of RootNode."
+                f"Found object of type {type(self._root).__name__}"
+                )
+
+    def _assert_editable(self):
+        if self.running():
+            raise ProgramTree.ProgramInProgressError(
+                "Cannot modify nodes in a program while it is running. " \
+                "Please kill the program or run it to completion first."
+            )
+        
+    def _assert_runnable(self):
+        pass        # optional for addins and subclasses
 
     # - - Constants - - 
 
@@ -99,7 +107,8 @@ class ProgramTree:
 
     # - - Initialization - - 
 
-    def __init__(self, root: Union[RootNode, Type[RootNode]]):
+    def __init__(self, root: Union[RootNode, Type[RootNode]],
+                 autofill=True):
         """Initializes a ProgramTree instance with a root node and an optional agent.
 
         This constructor sets up the fundamental structure of the program tree,
@@ -128,29 +137,25 @@ class ProgramTree:
         discover and register all nodes reachable from the root, populating the
         tree's initial structure and internal node collections.
         """
-        self._root: 'RootNode' = root() if isinstance(root, type) else root
+        self._root: 'RootNode' = None
         self._nodes: set['ProgramNode'] = set()
         self._nodes_by_type: dict[type, set['ProgramNode']] = defaultdict(set)
         self._level_counts = defaultdict(int)   # keeps track of how many nodes on each level
         self._max_node_depth = -1
-        self._agent = None
+
         self._program_stack: list['ProgramNode'] = []
 
+        self._verify_and_set_root(root)
         self._collect_nodes()
-        self._fill_out_program()
+        
+        if autofill:
+            self._fill_out_program()
 
-    def _set_agent(self, agent: 'Agent'):
-        """Sets the agent instance to which this program is bound.
+    def _verify_and_set_root(self, root):
+        self._root = root() if isinstance(root, type) else root
+        self._assert_root_valid()
 
-        This method should typically only be called by an instance of
-        :py:class:`~.agents.Agent` itself to establish the binding.
-
-        Parameters
-        ----------
-        agent : Agent
-            The agent instance to bind the program to.
-        """
-        self._agent = agent
+    # - - Private Helpers - - 
 
     def _cache_depth(self):
         if not self._level_counts:
@@ -286,6 +291,8 @@ class ProgramTree:
             raise ValueError('Node does not exist in tree')
         
         return node.get_parent()
+    
+    # - - Editing the Program - - 
 
     def replace_node(self, node, new_node: Union['ProgramNode', str] \
                      = RANDOM_REPLACEMENT):
@@ -335,6 +342,8 @@ class ProgramTree:
         self._fill_out_program()        # ensure program is complete
 
 
+    # - - Program Execution - - 
+
     def tick(self) -> 'ProgramTree.Status':
         """Executes a single step of the program's execution.
 
@@ -357,10 +366,8 @@ class ProgramTree:
             If an incomplete node is encountered during execution, indicating
             a structural issue in the program tree.
         """
-        # can't run unless bound to an agent
-        if not self.bound_to_agent():
-            raise ProgramTree.MissingAgentError('Cannot run program when not bound to an agent.')
-        
+        self._assert_runnable()
+
         # if stack empty, add root node
         if self.status == ProgramTree.Status.EXITED:
             self._program_stack.append(self._root)
@@ -435,33 +442,9 @@ class ProgramTree:
             :py:attr:`~.ProgramTree.Status.RUNNING`, :py:obj:`False` otherwise.
         """
         return self.status == ProgramTree.Status.RUNNING
-        
-    def bound_to_agent(self) -> bool:
-        """Checks if the program is currently bound to an agent.
+    
 
-        Returns
-        -------
-        bool
-            :py:obj:`True` if an :py:class:`~.agents.Agent` instance is attached to the program
-            (:py:attr:`~.ProgramTree._agent` is not :py:obj:`None`), :py:obj:`False` otherwise.
-        """
-        return self.agent is not None
-        
-    def copy(self) -> 'ProgramTree':
-        """Creates a deep copy of the ProgramTree instance.
-
-        The new :py:class:`~.ProgramTree` will have a deep copy of its
-        :py:attr:`~.ProgramTree._root` node and consequently all its
-        descendant nodes. The :py:attr:`~.ProgramTree._agent` attribute is
-        NOT copied (it will be :py:obj:`None` in the new tree).
-
-        Returns
-        -------
-        ProgramTree
-            A new :py:class:`~.ProgramTree` instance that is a deep copy
-            of the current program's structure.
-        """
-        return ProgramTree(root = self._root.copy())
+    # - - Special methods - - 
     
     def node_iter(self, type: Type[ProgramNode]=None):
         """Returns an iterator over the nodes in the program tree.
@@ -500,19 +483,28 @@ class ProgramTree:
             the classes of :py:class:`~.nodes.ProgramNode` instances found
             within the tree.
         """
-        return iter(self._nodes_by_type)  
-        
-    @property
-    def agent(self) -> 'Agent':
-        """The agent instance to which this program is currently attached.
+        return iter(self._nodes_by_type)
+    
+    def copy(self) -> 'ProgramTree':
+        """Creates a deep copy of the ProgramTree instance.
+
+        The new :py:class:`~.ProgramTree` will have a deep copy of its
+        :py:attr:`~.ProgramTree._root` node and consequently all its
+        descendant nodes.
 
         Returns
         -------
-        Agent or None
-            The attached :py:class:`~.agents.Agent` instance, or :py:obj:`None`
-            if no agent is currently bound.
+        ProgramTree
+            A new :py:class:`~.ProgramTree` instance that is a deep copy
+            of the current program's structure.
         """
-        return self._agent
+        return ProgramTree(root = self._root.copy())
+    
+    def is_editable(self):
+        return not self.running()
+    
+    def is_runnable(self):
+        return True          # optional for use with addins or subclasses
     
     @property
     def size(self) -> int:

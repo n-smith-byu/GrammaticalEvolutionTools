@@ -15,12 +15,14 @@ class Grammar:
 
     current_grammar = None
 
-    def __init__(self, warnings=True):
+    def __init__(self, min_compliant_agent: type = None, 
+                 warnings=True):
         self._roots: list[Type[GrammarNode]] = []
         self._all_node_classes: dict[str, Type[GrammarNode]] = {}
         self._concrete_types: set[Type[GrammarNode]] = set()
         self._abstract_types: set[Type[GrammarNode]] = set()
 
+        self._target_agent_type = min_compliant_agent
         self._warnings = warnings
         self._is_valid = False
 
@@ -129,3 +131,7 @@ class Grammar:
     @property
     def valid_node_classes(self) -> set[Type[GrammarNode]]:
         return self._concrete_types.copy()   
+    
+    @property
+    def target_agent_type(self):
+        return self._target_agent_type

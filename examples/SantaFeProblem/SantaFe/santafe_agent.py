@@ -1,8 +1,6 @@
+from .santafe_food import SantaFeFood
 from grammaticalevolutiontools.grid_based_tools import \
     GridBasedAgent, GridPosition
-from .Grammar import CodeNode
-
-from .santafe_food import SantaFeFood
 
 from typing import TYPE_CHECKING
 
@@ -11,10 +9,6 @@ if TYPE_CHECKING:
 
 
 class SantaFeAgent(GridBasedAgent):
-
-    @classmethod
-    def get_default_program_root_type(cls) -> type:
-        return CodeNode
 
     def __init__(self, program_tree=None):
         super(SantaFeAgent, self).__init__(program_tree)

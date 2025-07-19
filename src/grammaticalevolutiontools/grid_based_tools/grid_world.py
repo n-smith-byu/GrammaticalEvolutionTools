@@ -201,13 +201,13 @@ class GridWorld(World):
     def remove_agent(self, agent: GridBasedAgent):
         self._agents.remove(agent)
         self._agent_positions[agent.position].remove(agent)
-        agent._reset()
+        agent.reset()
 
         self.flag_agent_change()
 
     def clear_all_agents(self):
         for agent in self._agents:
-            agent._reset()
+            agent.reset()
 
         self._agent_positions.clear()
         self._agents.clear()
