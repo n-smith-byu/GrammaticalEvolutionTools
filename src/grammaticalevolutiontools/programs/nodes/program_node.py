@@ -192,6 +192,9 @@ class ProgramNode(BaseNode):
             warnings_ = ProgramNode.SHOW_WARNINGS
         )
 
+    def _assert_editable(self):
+        if self._program:
+            self._program._assert_editable()
 
     # - - Initialization Helpers - - 
 
@@ -503,8 +506,7 @@ class ProgramNode(BaseNode):
         IndexError
             If `index` is out of bounds or `max_num_children` is exceeded.
         """
-        self._program._assert_editable()
-
+        self._assert_editable()
         if new_child._program:
             raise ValueError("new_child must not be part of another program.")
 
@@ -516,8 +518,7 @@ class ProgramNode(BaseNode):
         return index
 
     def pop_child(self, index) -> 'ProgramNode':
-        self._program._assert_editable()
-
+        self._assert_editable()
         removed_node = BaseNode.pop_child(self, index)
 
         if self._program:

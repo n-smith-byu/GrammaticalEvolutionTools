@@ -46,7 +46,8 @@ def as_grammar_node(node_cls: Type[ProgramNode]):
                            "_on_collect_descendants_add",
                            "_on_collect_descendants_pop",
                            "_rollback_add",
-                           "_rollback_pop"
+                           "_rollback_pop",
+                           "get_probs",
                            "__str__",
                            "__repr__"}
     

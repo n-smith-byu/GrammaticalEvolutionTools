@@ -1,7 +1,6 @@
-from ...grammars import Grammar
-from ..._base_node import BaseNodeMeta
+from .. import Grammar
 
-class GrammarProgramMeta(BaseNodeMeta):
+class GrammarProgramMeta(type):
     def __call__(cls, *args, **kwds):
         if issubclass(cls, GrammarProgramAddin):
             if cls._GRAMMAR is NotImplemented:
@@ -27,10 +26,14 @@ class GrammarProgramAddin(metaclass=GrammarProgramMeta):
         return super().__init_subclass__()
 
     def _assert_root_valid(self, root):
-        if root and not isinstance(root, self.get_root_class()):
+        if root and not isinstance(root, self.get_root_class(self)):
             raise TypeError(
                 "Provided `root` does not match this Program's Grammar."
             )
+        
+    def _verify_and_set_root(self, root):
+        GrammarProgramAddin._assert_root_valid(self, root)
+        GrammarProgramAddin._set_root(self, root)
         
     def _set_root(self, root):
         self._root = root or self.create_root()

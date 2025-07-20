@@ -5,11 +5,10 @@ from grammaticalevolutiontools.grammars import \
 from ..santafe_agent import SantaFeAgent
 
 from typing import TYPE_CHECKING
-
 import numpy as np
 
 if TYPE_CHECKING:
-    from grammaticalevolutiontools.programs import AgentProgramTree
+    from grammaticalevolutiontools.agents import AgentProgramTree
 
 _MIN_SIGHT_RANGE = 1
 _MAX_SIGHT_RANGE = 3
