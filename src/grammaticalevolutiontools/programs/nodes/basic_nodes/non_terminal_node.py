@@ -28,15 +28,10 @@ class NonTerminalNode(ProgramNode):
         self._curr_child: int = -1
         return super()._custom_init() 
     
-    def _assert_not_running(self):
-        # if node is attached to program and the program is running
-        if self._program and self._program.running():
-            raise self._program.ProgramInProgressError(
-                    'Cannot modify program while it is running. '
-                    'Please kill program or run it to completion first.'
-                )
-        # if node not attached to program, but node is not reset
-        elif self.is_running():
+    def _assert_editable(self):
+        ProgramNode._assert_editable(self)
+
+        if self.is_running():
             raise RuntimeError(
                 'Cannot modify children while this node is still running. '
                 'Please reset th node first.'
@@ -46,30 +41,13 @@ class NonTerminalNode(ProgramNode):
         self._curr_child = -1
         for child in self.running_children:
             child.reset()
-
-    def add_child(self, child_node, index = None):
-        self._assert_not_running()
-        return ProgramNode.add_child(self, child_node, index)
-    
-    def replace_child(self, index, new_child):
-        self._assert_not_running()
-        return ProgramNode.replace_child(self, index, new_child)
-    
-    def pop_child(self, index):
-        self._assert_not_running()
-        return ProgramNode.pop_child(self, index)
     
     def remove_all_children(self):
-        # don't allow modifications to program while running
-        if self._program and self._program.running():
-            raise self._program.ProgramInProgressError(
-                    'Cannot modify program while it is running. '
-                    'Please kill program or run it to completion first.'
-                )
-        
         # if node not attached to program or program not running, 
         # then resets node and removes all children
+        ProgramNode._assert_editable(self)
         self.reset()
+        
         return ProgramNode.remove_all_children(self)
         
     def is_running(self):

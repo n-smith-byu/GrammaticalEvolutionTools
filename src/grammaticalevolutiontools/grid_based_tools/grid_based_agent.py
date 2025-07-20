@@ -1,5 +1,4 @@
-from ..agents import Agent
-from ..programs import AgentProgramTree
+from ..agents import Agent, AgentProgramTree
 from .grid_world_object import GridWorldObject
 from .grid_position import GridPosition
 
@@ -164,7 +163,14 @@ class GridBasedAgent(Agent):
     # - - Magic Methods - -
 
     def __repr__(self):
-
-        return f"({type(self).__name__}, world={type(self._world).__name__ if self._world is not None else 'None'}, " + \
-               f"pos={self._pos if self._pos is not None else 'None'}, dir={self._curr_dir.name}, " + \
+        program_str = str(self._program)
+        if self._program:
+            program_str = f"'{program_str if len(program_str) <= 25 \
+                              else (program_str[:25] + '...')}'"
+            
+        return f"({type(self).__name__}, " + \
+               f"world={type(self._world).__name__ if self._world is not None else 'None'}, " + \
+               f"program={program_str}, " + \
+               f"pos={self._pos if self._pos is not None else 'None'}, " + \
+               f"dir={self._curr_dir.name}, " + \
                f"rewards={self._score})"

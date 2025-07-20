@@ -1,6 +1,7 @@
-from .santafe_food import SantaFeFood
 from grammaticalevolutiontools.grid_based_tools import \
     GridBasedAgent, GridPosition
+
+from .santafe_food import SantaFeFood
 
 from typing import TYPE_CHECKING
 
@@ -9,6 +10,16 @@ if TYPE_CHECKING:
 
 
 class SantaFeAgent(GridBasedAgent):
+
+    @classmethod
+    def default_grammar(cls):
+        if not cls._default_program_cls:
+            from .Grammar import SantaFeGrammar
+            cls._default_grammar = SantaFeGrammar
+
+        return cls._default_grammar
+    
+    _default_grammar = None
 
     def __init__(self, program_tree=None):
         super(SantaFeAgent, self).__init__(program_tree)

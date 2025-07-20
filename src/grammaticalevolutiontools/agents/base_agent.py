@@ -1,14 +1,35 @@
-from ..programs import AgentProgramTree
+from .agent_program import AgentProgramTree
+from ..grammars import Grammar
 
 from numbers import Number
 from uuid import uuid4
 
-from typing import TYPE_CHECKING
+from typing import Type, TYPE_CHECKING
+import warnings
 
 if TYPE_CHECKING:
     from ..worlds import World
 
 class Agent:
+
+    @classmethod
+    def default_grammar(cls) -> Grammar:
+        return None
+    
+    @classmethod
+    def default_program_cls(cls) -> Type[AgentProgramTree]:
+        if not cls._default_program_cls:
+            default_grammar = cls.default_grammar()
+            if default_grammar:
+                class AgentProgram(AgentProgramTree):
+                    _GRAMMAR = default_grammar
+                    pass
+
+                cls._default_program_cls = AgentProgram
+        
+        return cls._default_program_cls
+    
+    _default_program_cls = None
 
     # - - Exceptions - - 
 
@@ -26,7 +47,7 @@ class Agent:
 
     # - - Initialization - -
 
-    def __init__(self, program: AgentProgramTree = None):
+    def __init__(self, program: AgentProgramTree = None, autogen=True):
         self._world: World = None
         self._program: AgentProgramTree = None
         self._uuid = uuid4()       # just to make hashable
@@ -37,6 +58,16 @@ class Agent:
         if program:
             self._assert_valid_program(program)
             self._set_program(program)
+        elif autogen:
+            program_cls = self.default_program_cls()
+            if not program_cls:
+                warnings.warn(
+                        "Tried to create Program, but no default " \
+                        "grammar found for agent class " \
+                        f"{type(self).__name__}.",
+                        UserWarning
+                        )
+            self._set_program(program_cls())
         
     # - - Assertions - -
 
