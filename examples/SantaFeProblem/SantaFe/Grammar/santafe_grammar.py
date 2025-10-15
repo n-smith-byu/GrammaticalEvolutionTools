@@ -53,7 +53,7 @@ General Notes and Reminders:
 """
 
 
-with Grammar(min_compliant_agent=SantaFeAgent) as SantaFeGrammar:
+with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
     # CodeNode will be the root node for our SantaFe Grammar, so we inherit from the base RootNode
     # In our Grammar, <Code> always goes to <Progs>, so there is only one possible child.
     @as_grammar_node 

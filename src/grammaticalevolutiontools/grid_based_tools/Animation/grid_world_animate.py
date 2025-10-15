@@ -1,7 +1,5 @@
 from ..grid_based_agent import GridBasedAgent
 
-from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation
 from matplotlib.colors import LinearSegmentedColormap, to_rgb
 from scipy.sparse import coo_matrix, lil_matrix
 import seaborn as sns
@@ -88,57 +86,101 @@ class GridWorldAnimation:
             return frames
     
     def _create_arrow(self, agent_pos, agent_dir, agent_class, arrow_colors_dict) -> Arrow:
-        arrow_len = 0.5
-        arrow_offset = 0.5
-        # get arrow coordinates
+        """
+        Returns an Arrow tuple (x, y, dx, dy, color, width) for matplotlib.
+        Starts at the front-middle of the agent's cell in the grid.
+        """
+        arrow_len = 0.5   # how long the arrow is
+        start_offset = 0.25  # move arrow slightly forward from center
 
-        y, x = agent_pos
-        dir_vec = GridBasedAgent.direction_to_vec(agent_dir)
-        
-        if agent_dir == GridBasedAgent.Direction.RIGHT:
-            x += 2*arrow_offset
-            y += arrow_offset
-        elif agent_dir == GridBasedAgent.Direction.DOWN:
-            x += arrow_offset
-            y += 2*arrow_offset
-        elif agent_dir == GridBasedAgent.Direction.LEFT:
-            y += arrow_offset
-        elif agent_dir == GridBasedAgent.Direction.UP:
-            x += arrow_offset
+        # agent_pos = (row, col)
+        row, col = agent_pos
 
-        # draw arrow
-        dy, dx = dir_vec*arrow_len
+        # center of the cell
+        x = col
+        y = row
 
+        # direction vector (dy, dx) in cell coordinates
+        dir_vec = GridBasedAgent.direction_to_vec(agent_dir)  # assume returns (dy, dx)
+        dy, dx = dir_vec
+
+        # move starting point forward slightly in the direction the agent is facing
+        x += dx * start_offset
+        y += dy * start_offset
+
+        # scale the direction to the arrow length
+        dx *= arrow_len
+        dy *= arrow_len
+
+        # return as (x, y, dx, dy, color, width)
         return (x, y, dx, dy, arrow_colors_dict[agent_class], 0.2)
 
 
     # - - Public Methods - -
 
     def play(self, pause=200):
+        """
+        Plays the animation in a notebook-friendly way using blitting for speed.
+        Returns the FuncAnimation object. Keep a reference to it!
+        """
+        import matplotlib.pyplot as plt
+        from matplotlib.animation import FuncAnimation
+        from matplotlib.patches import FancyArrow
+
         if self.fig is not None:
             plt.close(self.fig)
 
         self.fig, self.ax = plt.subplots()
+        self.ax.set_aspect('equal')
 
-        def update(frame):
-            self.ax.clear()
+        # Initial grid
+        first_grid, first_arrows = self._frames[0]
+        img = self.ax.imshow(first_grid.toarray(), cmap=self._CMAP, vmin=0, vmax=1)
 
-            grid, arrows = self._frames[frame]
-            grid: coo_matrix
-            arrows: list[Arrow]
+        # Create arrow artists
+        arrow_artists = []
+        for x, y, dx, dy, color, width in first_arrows:
+            arrow = FancyArrow(x, y, dx, dy, color=color, width=width)
+            self.ax.add_patch(arrow)
+            arrow_artists.append(arrow)
 
-            # drw grid
-            sns.heatmap(grid.toarray(), ax=self.ax, annot=False, cmap=self._CMAP, vmin=0, vmax=1, fmt=".2f", linewidths=0,
-                        cbar=False, xticklabels=False, yticklabels=False,
-                        square=True)
-            
+        # Keep a title artist for blitting
+        title_artist = self.ax.set_title("Frame 0")
 
+        def update(frame_idx):
+            grid, arrows = self._frames[frame_idx]
+
+            # Update grid
+            img.set_data(grid.toarray())
+
+            # Update arrows
+            # Remove old arrows
+            for arrow in arrow_artists:
+                arrow.remove()
+            arrow_artists.clear()
+
+            # Add new arrows
             for x, y, dx, dy, color, width in arrows:
-                self.ax.arrow(x, y, dx, dy, color=color, width=width)
+                arrow = FancyArrow(x, y, dx, dy, color=color, width=width)
+                self.ax.add_patch(arrow)
+                arrow_artists.append(arrow)
 
-            self.ax.set_title(str(frame))
-        
-        return FuncAnimation(self.fig, update, frames = len(self._frames), interval=pause)
+            # Update title
+            title_artist.set_text(f"Frame {frame_idx}")
+
+            # Return all artists that need to be redrawn
+            return [img, title_artist, *arrow_artists]
+
+        anim = FuncAnimation(
+            self.fig,
+            update,
+            frames=len(self._frames),
+            interval=pause,
+            blit=True
+        )
+
+        return anim
+
 
     # - - Magic Methods - -
 

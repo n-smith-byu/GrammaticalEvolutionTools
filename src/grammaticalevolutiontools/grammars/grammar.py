@@ -1,7 +1,10 @@
 from .grammar_node import GrammarNode
 
-from typing import Type
+from typing import Type, TYPE_CHECKING
 import warnings
+
+if TYPE_CHECKING:
+    from ..agents import Agent
 
 class Grammar:
 
@@ -15,14 +18,14 @@ class Grammar:
 
     current_grammar = None
 
-    def __init__(self, min_compliant_agent: type = None, 
+    def __init__(self, target_agent_type: Type[Agent] = None, 
                  warnings=True):
         self._roots: list[Type[GrammarNode]] = []
         self._all_node_classes: dict[str, Type[GrammarNode]] = {}
         self._concrete_types: set[Type[GrammarNode]] = set()
         self._abstract_types: set[Type[GrammarNode]] = set()
 
-        self._target_agent_type = min_compliant_agent
+        self._target_agent_type = target_agent_type
         self._warnings = warnings
         self._is_valid = False
 
@@ -109,11 +112,11 @@ class Grammar:
 
             self._concrete_types.add(cls)
                 
-    def get_class(self, cls_name: str):
+    def get_class(self, cls_name: str) -> Type[GrammarNode]:
         return self._all_node_classes[cls_name]
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         return self._is_valid
 
     @property
@@ -121,7 +124,7 @@ class Grammar:
         return self._roots[0]
     
     @property
-    def warnings_enabled(self):
+    def warnings_enabled(self) -> bool:
         return self._warnings
     
     @property
@@ -133,5 +136,5 @@ class Grammar:
         return self._concrete_types.copy()   
     
     @property
-    def target_agent_type(self):
+    def target_agent_type(self) -> Type[Agent]:
         return self._target_agent_type

@@ -6,9 +6,9 @@ if TYPE_CHECKING:
     from .santafe_world import SantaFeWorld
 
 class SantaFeFood(GridWorldReward):
-    def __init__(self, world: 'SantaFeWorld', pos: GridPosition):
+    def __init__(self, world: 'SantaFeWorld'):
         super(SantaFeFood, self).__init__(total_amount=1, yield_amount=1,
-                                          world=world, pos=pos)
+                                          world=world)
         
     
         

@@ -1,5 +1,5 @@
 from ..programs.tree import ProgramTree
-from ..grammars.program_mods import GrammarProgramAddin
+from ..programs.mods import GrammarProgramAddin
 
 from typing import TYPE_CHECKING
 

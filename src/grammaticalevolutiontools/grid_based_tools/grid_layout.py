@@ -3,7 +3,7 @@ from .grid_world_object import GridWorldObject
 from .grid_position import GridPosition
 
 import numpy as np
-from typing import Type
+from typing import Type, Self
 import numbers
 
 class GridLayout(WorldLayout):
@@ -89,7 +89,7 @@ class GridLayout(WorldLayout):
 
     # -- Modifying the Layout
 
-    def set_dims(self, width: int, height: int):
+    def set_dims(self, width: int, height: int) -> Self:
         self._assert_not_locked()
         self._assert_not_initialized()
         self._assert_width_and_height_valid(width, height)
@@ -99,7 +99,9 @@ class GridLayout(WorldLayout):
 
         self.__object_positions = {}
 
-    def add_object(self, obj_class: Type[GridWorldObject], pos: GridPosition):
+        return self
+
+    def add_object(self, obj_class: Type[GridWorldObject], pos: GridPosition) -> Self:
         self._assert_not_locked()
         self._assert_initialized()
         self._assert_space_valid_and_open(pos)
@@ -107,6 +109,8 @@ class GridLayout(WorldLayout):
 
         _pos = GridPosition(pos)
         self.__object_positions[_pos] = obj_class
+
+        return self
     
     def get_object_positions(self) -> dict[GridPosition, Type[GridWorldObject]]:
         if self.__object_positions is not None:
@@ -213,7 +217,7 @@ class GridLayout(WorldLayout):
         return _width, _height, _temp_obj_pos_dict
 
     def load_map_layout_from_file(self, file_path: str, obj_symbols: list[str], obj_classes: list[Type[GridWorldObject]],
-                                  empty_space_symbol: str, lock=True):
+                                  empty_space_symbol: str, lock=True) -> Self:
         
         self._assert_not_locked()
         self._assert_not_initialized()
@@ -229,13 +233,15 @@ class GridLayout(WorldLayout):
         if lock:
             self.lock()
 
+        return self
+
 
     # -- LOADING MAP FROM DICTIONARY --
 
     def load_map_layout_from_dict(self, map_width: int, map_height: int, 
                                   obj_pos_dict: dict[Type[GridWorldObject], list[GridPosition]] = None,
                                   pos_obj_dict: dict[GridPosition, Type[GridWorldObject]] = None, 
-                                  lock=True):
+                                  lock=True) -> Self:
         
         self._assert_not_locked()
         self._assert_not_initialized()
@@ -256,6 +262,8 @@ class GridLayout(WorldLayout):
 
         if lock:
             self.lock()
+
+        return self
 
 
 

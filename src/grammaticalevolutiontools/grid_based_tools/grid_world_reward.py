@@ -14,9 +14,9 @@ class GridWorldReward(Reward, GridWorldObject):
     def is_passable(self):
         return True
     
-    def __init__(self, total_amount, yield_amount, world: 'GridWorld', pos: 'GridPosition'):
+    def __init__(self, total_amount, yield_amount, world: 'GridWorld'):
         Reward.__init__(self, total_amount, yield_amount)
-        GridWorldObject.__init__(self, world, pos)
+        GridWorldObject.__init__(self, world)
 
     def _give_reward(self, agent: 'GridBasedAgent'):
         _yield = min(self._base_yield, self._remaining_amount)

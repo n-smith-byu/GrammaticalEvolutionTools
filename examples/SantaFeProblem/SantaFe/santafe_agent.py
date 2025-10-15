@@ -18,8 +18,6 @@ class SantaFeAgent(GridBasedAgent):
             cls._default_grammar = SantaFeGrammar
 
         return cls._default_grammar
-    
-    _default_grammar = None
 
     def __init__(self, program_tree=None):
         super(SantaFeAgent, self).__init__(program_tree)

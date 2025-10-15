@@ -14,7 +14,7 @@ class Agent:
 
     @classmethod
     def default_grammar(cls) -> Grammar:
-        return None
+        return cls._default_grammar
     
     @classmethod
     def default_program_cls(cls) -> Type[AgentProgramTree]:
@@ -22,13 +22,14 @@ class Agent:
             default_grammar = cls.default_grammar()
             if default_grammar:
                 class AgentProgram(AgentProgramTree):
-                    _GRAMMAR = default_grammar
+                    _grammar = default_grammar
                     pass
 
                 cls._default_program_cls = AgentProgram
         
         return cls._default_program_cls
     
+    _default_grammar = None
     _default_program_cls = None
     _requires_world = False
 
@@ -63,12 +64,13 @@ class Agent:
             program_cls = self.default_program_cls()
             if not program_cls:
                 warnings.warn(
-                        "Tried to create Program, but no default " \
-                        "grammar found for agent class " \
-                        f"{type(self).__name__}.",
+                        "`autogen` set to True, but no default " \
+                        "grammar found for " \
+                        f"{type(self).__name__}. Could not create a program.",
                         UserWarning
                         )
-            self._set_program(program_cls())
+            else:
+                self._set_program(program_cls())
         
     # - - Assertions - -
 
