@@ -30,6 +30,7 @@ class Agent:
         return cls._default_program_cls
     
     _default_program_cls = None
+    _requires_world = False
 
     # - - Exceptions - - 
 
@@ -101,6 +102,9 @@ class Agent:
 
         self._world = world
 
+    def _clear_world(self):
+        self._world = None
+
     # - - Helpers - - 
 
     def _set_program(self, program: AgentProgramTree):
@@ -157,7 +161,7 @@ class Agent:
             Runs the program through the next executable node. Exits if run and no nodes are left. 
             If loop is True (default), then the program will restart rather than exiting. 
         """
-        if self.requires_world and not self.assigned_to_world():
+        if self._requires_world and not self.assigned_to_world():
             raise Agent.WorldNotSetError("Cannot run program without agent being assigned a world unless this is a worldless agent.")
 
         status = self._program.tick()
@@ -198,3 +202,9 @@ class Agent:
     
     def __hash__(self):
         return hash(self._uuid)
+    
+    def __lt__(self, other):
+        if not isinstance(other, Agent):
+            raise TypeError("Cannot compare Agent to non-Agent")
+        
+        return self.score < other.score

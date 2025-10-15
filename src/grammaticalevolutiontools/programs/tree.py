@@ -498,7 +498,8 @@ class ProgramTree:
             A new :py:class:`~.ProgramTree` instance that is a deep copy
             of the current program's structure.
         """
-        return ProgramTree(root = self._root.copy())
+        program_cls = type(self)
+        return program_cls(root = self._root.copy())
     
     def is_editable(self):
         return not self.running()

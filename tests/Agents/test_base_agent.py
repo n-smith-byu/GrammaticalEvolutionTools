@@ -59,8 +59,8 @@ class TestBaseAgent:
         agent1 = self.get_worldless_agent()
         agent2 = self.get_world_agent()
 
-        assert not agent1.requires_world
-        assert agent2.requires_world
+        assert not agent1._requires_world
+        assert agent2._requires_world
 
     def test_adding_to_world(self):
         agent = self.get_world_agent()

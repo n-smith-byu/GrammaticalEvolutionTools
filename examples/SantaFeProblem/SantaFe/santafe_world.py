@@ -7,6 +7,9 @@ from .santafe_food import SantaFeFood
 import importlib.resources
 from pathlib import Path
 
+from typing import Type, TypeVar, ClassVar
+
+
 # Defining a layout consisting of the Santa Fe Trail
 class SantaFeLayout(GridLayout):
 
@@ -21,29 +24,23 @@ class SantaFeLayout(GridLayout):
                                        obj_symbols=['#'], obj_classes=[SantaFeFood],
                                        empty_space_symbol='.')
 
+class SantaFeWorld(GridWorld[SantaFeAgent]):
 
-class SantaFeWorld(GridWorld):
-
-    _LAYOUT = SantaFeLayout()
+    _layout = SantaFeLayout()
 
     def __init__(self, agent: 'SantaFeAgent'=None):
         
         super(SantaFeWorld, self).__init__(agent_classes=[SantaFeAgent], obj_types=[SantaFeFood],
-                                           world_layout=SantaFeWorld._LAYOUT)
+                                           world_layout=SantaFeWorld._layout)
 
         self._agent_start_pos = GridPosition((0,0))
 
         if agent is not None:
             self.load_new_agents(agent)
 
-    def load_new_agents(self, new_agents_and_positions, recording_on=False):
-        raise NotImplementedError(
-            "load_new_agents not implemented for SantaFeWorld. "
-            "Please use load_new_agent, instead.")
-
-    def load_new_agent(self, agent: SantaFeAgent, recording_on=False):
+    def reset_agent(self, agent: SantaFeAgent, start: GridPosition=GridPosition((0,0)), recording_on=False):
         return super().load_new_agents(
-            [(agent, self._agent_start_pos)],
+            [(agent, start)],
             recording_on=recording_on
         )
 

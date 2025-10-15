@@ -42,7 +42,7 @@ def as_grammar_node(node_cls: Type[ProgramNode]):
                            "replace_child",
                            "remove_all_children",
                            "_get_properties_to_pass_to_children",
-                           "_get_properties_for_removed_children",
+                           "_get_properties_for_removed_child",
                            "_on_collect_descendants_add",
                            "_on_collect_descendants_pop",
                            "_rollback_add",
