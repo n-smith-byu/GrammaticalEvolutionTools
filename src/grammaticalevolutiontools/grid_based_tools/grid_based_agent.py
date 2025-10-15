@@ -79,6 +79,10 @@ class GridBasedAgent(Agent):
             raise TypeError(f"Agent must be bound to an instance of GridWorld to function properly. Instead found object of type {type(world)}")
             
         return super()._set_world(world)
+    
+    def _clear_world(self):
+        super()._clear_world()
+        self._pos = None
 
     def _set_position(self, pos: GridPosition):
         """
@@ -90,10 +94,11 @@ class GridBasedAgent(Agent):
             pos (GridPosition): the position of this agent in the world to start. 
 
         """     
-        if self.requires_world and self._world is None:
+        if self._requires_world and self._world is None:
             raise Agent.WorldNotSetError("Cannot set position of agent in world when world is not set")
         
         self._pos = GridPosition(pos)
+
 
     # -- Assertions --
 

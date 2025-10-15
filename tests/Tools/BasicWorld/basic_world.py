@@ -27,7 +27,7 @@ class BasicWorld(World):
     _LAYOUT = EmptyLayout(lock=True)
 
     def __init__(self):
-        super(BasicWorld, self).__init__(agent_classes=[BasicWorldAgent], obj_types=[], 
+        super(BasicWorld, self).__init__(agent_class=[BasicWorldAgent], obj_types=[], 
                                          world_layout=BasicWorld._LAYOUT)
         
     def tick(self):
@@ -40,7 +40,7 @@ class BasicWorld(World):
 class BasicWorldNoLayout(World):
 
     def __init__(self, agent_classes, obj_types, layout):
-        super(BasicWorldNoLayout, self).__init__(agent_classes=agent_classes, obj_types=obj_types, 
+        super(BasicWorldNoLayout, self).__init__(agent_class=agent_classes, obj_types=obj_types, 
                                          world_layout=layout)
         
     def tick(self):

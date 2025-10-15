@@ -7,9 +7,11 @@ from ..worlds.base_world import World
 from .Animation import GridWorldAnimation, Color
 
 from collections import defaultdict
-from typing import Union, Type, Tuple
+from typing import Union, Type, Tuple, List, TypeVar, Generic
 
-class GridWorld(World):
+class GridWorld[A: GridBasedAgent = GridBasedAgent, 
+                L: GridLayout = GridLayout, 
+                O: GridWorldObject = GridWorldObject](World[A, L, O]):
     """
     An Class used to create Worlds for Grammatical Evolution Problems. 
 
@@ -21,15 +23,13 @@ class GridWorld(World):
         __world (World): A private property. The world to which this reward belongs. 
     """
 
-    AgentMarker = Tuple[Type[GridBasedAgent], 'GridPosition', GridBasedAgent.Direction]
-    ObjMarker = Tuple[Type['GridWorldObject'], 'GridPosition']
+    type AgentMarker = Tuple[Type[A], 'GridPosition', GridBasedAgent.Direction]
+    type ObjMarker = Tuple[Type[O], 'GridPosition']
 
-    ObjTrace = list[tuple[ObjMarker]]
-    AgentTrace = list[tuple[AgentMarker]]
+    type ObjTrace = List[Tuple[ObjMarker]]
+    type AgentTrace = List[Tuple[AgentMarker]]
  
-    def __init__(self, agent_classes:list[Type[GridBasedAgent]], obj_types:list[Type[GridWorldObject]],
-                 world_layout: GridLayout,
-                 agents_can_share_spaces:bool=False):
+    def __init__(self, layout: GridLayout, agents_can_share_spaces:bool=False):
         """
             Initializes an instance of a World object.
 
@@ -48,19 +48,15 @@ class GridWorld(World):
             Returns:
             
         """
-        super(GridWorld, self).__init__(agent_classes, obj_types, world_layout)
+        super(GridWorld, self).__init__(layout=layout)
 
         self._agents_can_share_spaces: bool = agents_can_share_spaces
 
-        self._agent_positions: dict[GridPosition, set[GridBasedAgent]] = defaultdict(set)
-        self._object_positions: dict[GridPosition, list[GridWorldObject]] = defaultdict(list)
+        self._agent_positions: dict[GridPosition, set[A]] = defaultdict(set)
+        self._object_positions: dict[GridPosition, list[O]] = defaultdict(list)
 
-        self._agents: set[GridBasedAgent]
-        self._objects: set[GridWorldObject]
-        self._layout: GridLayout
-
-        self._agent_trace: GridWorld.AgentTrace
-        self._obj_trace: GridWorld.ObjTrace
+        self._agent_trace: GridWorld.AgentTrace = []
+        self._obj_trace: GridWorld.ObjTrace = []
 
         self._agents_changed: bool = False
         self._objs_changed: bool = False
@@ -92,25 +88,16 @@ class GridWorld(World):
                 "Cannot place an impassable object where an "
                 "agent is located."
             )
-        
-    def _assert_valid_layout(self, layout):
-        if not isinstance(layout, GridLayout):
-            raise TypeError(
-                "Layout for a GridWorld must be an instance of "
-                "GridLayout"
-            )
-        super()._assert_valid_layout(layout)
-
 
     # -- Agent and Object Position Trackers --
 
-    def update_agent_position(self, agent: GridBasedAgent, old_pos: GridPosition):
+    def update_agent_position(self, agent: A, old_pos: GridPosition):
         if old_pos is not None:
             self._agent_positions[old_pos].remove(agent)
         self._agent_positions[agent.position].add(agent)
         self.flag_agent_change()
 
-    def update_obj_position(self, obj: GridWorldObject, old_pos: GridPosition):
+    def update_obj_position(self, obj: O, old_pos: GridPosition):
         if old_pos is not None:
             self._object_positions[old_pos].remove(obj)
         self._object_positions[obj.position].append(obj)
@@ -175,42 +162,26 @@ class GridWorld(World):
 
     # - - Agent Manipulation - -
     
-    def add_agent(self, agent_or_agent_class: Union[GridBasedAgent, Type[GridBasedAgent]], position: GridPosition):
-
-        _pos = GridPosition(position)
-        new_agent: GridBasedAgent = None
-
-        ## Check to make sure agent or provided agent class is valid. ## 
-        if isinstance(agent_or_agent_class, type):
-            agent_class = agent_or_agent_class 
-            self._assert_agent_valid(agent_class)
-            new_agent = agent_class()
-        else:
-            new_agent = agent_or_agent_class
-            self._assert_agent_valid(new_agent)
-
-        _pos = GridPosition(position)
-        new_agent._set_world(self)
-        new_agent._set_position(_pos)
-
-        self._agent_positions[_pos].add(new_agent)
-        self._agents.add(new_agent)
+    def add_agent(self, agent: A, 
+                  pos: GridPosition):
+        
+        super().add_agent(agent)
+        _pos = GridPosition(pos)
+        self._agent_positions[_pos].add(agent)
+        agent._set_position(_pos)
 
         self.flag_agent_change()
 
     def remove_agent(self, agent: GridBasedAgent):
-        self._agents.remove(agent)
+        super().remove_agent(agent)
         self._agent_positions[agent.position].remove(agent)
-        agent.reset()
 
         self.flag_agent_change()
 
-    def clear_all_agents(self):
-        for agent in self._agents:
-            agent.reset()
-
+    def clear_agents(self):
+        super().clear_agents()
+            
         self._agent_positions.clear()
-        self._agents.clear()
 
         self.flag_agent_change()
 
@@ -230,9 +201,6 @@ class GridWorld(World):
 
     def load_new_agents(self, new_agents_and_positions: list[Tuple[Union[GridBasedAgent, Type[GridBasedAgent]], GridPosition]],
                         recording_on=False):
-        """
-        
-        """
         
         self.clear_all_objects()
         self.clear_all_agents()
@@ -342,15 +310,3 @@ class GridWorld(World):
     def __hash__(self):
         return hash(id(self))
     
-
-    
-
-        
-    
-
-
-    
-
-
-
-        
