@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from ..objects import WorldObject
 
-from typing import Type
+from typing import Type, Self
 
 class WorldLayout(ABC):
     class LayoutLockedError(RuntimeError):
@@ -48,9 +48,11 @@ class WorldLayout(ABC):
         
     # - - - - 
 
-    def lock(self):
+    def lock(self) -> Self:
         self._assert_initialized(msg='Cannot lock layout before it has been initialized.')
         self._locked = True
+
+        return self
 
     def locked(self):
         return self._locked

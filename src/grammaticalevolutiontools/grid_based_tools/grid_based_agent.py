@@ -65,8 +65,8 @@ class GridBasedAgent(Agent):
     # - - Instance Definition - - #
     ###############################
 
-    def __init__(self, program: AgentProgramTree = None):
-        super(GridBasedAgent, self).__init__(program)
+    def __init__(self, program: AgentProgramTree = None, autogen=True):
+        super(GridBasedAgent, self).__init__(program, autogen)
 
         self._world: 'GridWorld'
         self._pos: GridPosition = None

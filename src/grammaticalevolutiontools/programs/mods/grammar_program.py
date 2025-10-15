@@ -1,27 +1,27 @@
-from .. import Grammar
+from ...grammars import Grammar
 
 class GrammarProgramMeta(type):
     def __call__(cls, *args, **kwds):
         if issubclass(cls, GrammarProgramAddin):
-            if cls._GRAMMAR is NotImplemented:
+            if cls._grammar is NotImplemented:
                 raise TypeError(
                     "`GrammarProgramTree` subclasses must implement the "
-                    "`_GRAMMAR` class attribute before they can be "
+                    "`_grammar` class attribute before they can be "
                     "instantiated."
                     )
         
         return super().__call__(*args, **kwds)
 
 class GrammarProgramAddin(metaclass=GrammarProgramMeta):
-    _GRAMMAR: Grammar = NotImplemented
+    _grammar = NotImplemented
 
     def __init_subclass__(cls):
-        if cls._GRAMMAR is not NotImplemented and \
-                not isinstance(cls._GRAMMAR, Grammar):
+        if cls._grammar is not NotImplemented and \
+                not isinstance(cls._grammar, Grammar):
             raise TypeError(
-                "`_GRAMMAR` class attribute of subclasses must be a valid "
+                "`_grammar` class attribute of subclasses must be a valid "
                 "instance of Grammar. Found object of type "
-                f"{type(cls._GRAMMAR).__name__}"
+                f"{type(cls._grammar).__name__}"
                 )
         return super().__init_subclass__()
 
@@ -45,8 +45,8 @@ class GrammarProgramAddin(metaclass=GrammarProgramMeta):
     
     @classmethod
     def get_root_class(cls):
-        return cls._GRAMMAR.root
+        return cls._grammar.root
 
     @classmethod
     def get_grammar(cls):
-        return cls._GRAMMAR
+        return cls._grammar

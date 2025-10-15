@@ -17,27 +17,29 @@ class GridWorldObject(WorldObject):
     def is_passable(self) -> bool:
         return NotImplemented
 
-    def __init__(self, world: 'GridWorld', pos: 'GridPosition'):
+    def __init__(self, world: 'GridWorld', pos = None):
 
         super(GridWorldObject, self).__init__(world)
         self._assert_world_is_grid_world(world)
-    
-        self._world: 'GridWorld' = world
-        self._pos = GridPosition(pos)
-        self._passable: bool = type(self).is_passable()
 
+        self._world: 'GridWorld' = world
+        self._is_passable: bool = type(self).is_passable()
         self._ignore_passability: bool = False
+        self._pos = None
 
     # -- Assertions --
     def _assert_world_is_grid_world(self, world):
         from .grid_world import GridWorld
         if not isinstance(world, GridWorld):
                 raise TypeError('world must be an instance of GridWorld')
-    
+
+    def is_passable(self) -> bool:
+        return self._is_passable
+
+    def _set_pos(self, pos: GridPosition):
+        self._pos = pos
+
     @property
-    def position(self):
+    def pos(self):
         return self._pos
-    
-    def passable(self) -> bool:
-        return self._passable
     

@@ -24,21 +24,20 @@ class SantaFeLayout(GridLayout):
                                        obj_symbols=['#'], obj_classes=[SantaFeFood],
                                        empty_space_symbol='.')
 
-class SantaFeWorld(GridWorld[SantaFeAgent]):
+class SantaFeWorld(GridWorld[SantaFeAgent, SantaFeLayout]):
 
     _layout = SantaFeLayout()
 
     def __init__(self, agent: 'SantaFeAgent'=None):
         
-        super(SantaFeWorld, self).__init__(agent_classes=[SantaFeAgent], obj_types=[SantaFeFood],
-                                           world_layout=SantaFeWorld._layout)
+        super(SantaFeWorld, self).__init__(SantaFeWorld._layout)
 
         self._agent_start_pos = GridPosition((0,0))
 
         if agent is not None:
-            self.load_new_agents(agent)
+            self.reset_with_agent(agent)
 
-    def reset_agent(self, agent: SantaFeAgent, start: GridPosition=GridPosition((0,0)), recording_on=False):
+    def reset_with_agent(self, agent: SantaFeAgent, start: GridPosition=GridPosition((0,0)), recording_on=False):
         return super().load_new_agents(
             [(agent, start)],
             recording_on=recording_on

@@ -2,16 +2,16 @@ from .layouts import WorldLayout
 from .objects import WorldObject
 from ..agents import Agent
 
-from typing import Type, Generic, TypeVar, ClassVar, get_origin, get_args
+from typing import Self
 
 from abc import ABC, abstractmethod
 
 
 class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):
 
-    _min_agent_class: ClassVar[Type[A]]
-    _min_layout_class: ClassVar[Type[L]]
-    _min_obj_class: ClassVar[Type[O]]
+    _min_agent_class = Agent
+    _min_layout_class = WorldLayout
+    _min_obj_class = WorldObject
 
     # - - Static Assertions - - 
 
@@ -24,41 +24,27 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):
         
     # - - Class Methods - -
 
-    def __init_subclass__(cls, *args, **kwargs):
-        super().__init_subclass__(*args, **kwargs) 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
 
-        # 1. Start by inheriting parent's types (safer MRO check)
-        parent: Type[World] | None = next(
-            (b for b in cls.__mro__[1:] if hasattr(b, "_min_agent_class")), 
-             None)
-        
-        if parent:
-            cls._min_agent_class = parent._min_agent_class
-            cls._min_layout_class = parent._min_layout_class
-            cls._min_obj_class = parent._min_obj_class
-        else:
-            # Fallback to the explicit base bounds
-            cls._min_agent_class = Agent
-            cls._min_layout_class = WorldLayout
-            cls._min_obj_class = WorldObject
+        parent = next((b for b in cls.__mro__[1:] if hasattr(b, "_min_agent_class")), None)
 
-        # 2. Override based on explicit generic specialization
-        for base in getattr(cls, "__orig_bases__", []):
-            if get_origin(base) is World:
-                args = get_args(base)
-                if len(args) != 3:
+        # 3) Enforce narrowing: subclass override must be a subclass of parent's
+        if parent is not None:
+            for attr, parent_attr in (
+                ("_min_agent_class", parent._min_agent_class),
+                ("_min_layout_class", parent._min_layout_class),
+                ("_min_obj_class", parent._min_obj_class),
+            ):
+                sub_attr = getattr(cls, attr)
+                if sub_attr is None:
+                    # allow None to mean "not set" (should not normally happen here)
+                    continue
+                if parent_attr is not None and not issubclass(sub_attr, parent_attr):
                     raise TypeError(
-                        f"{cls.__name__} must specify either all three type parameters or none"
+                        f"{cls.__name__}.{attr} = {sub_attr.__name__} "
+                        f"must be a subclass of {parent_attr.__name__}"
                     )
-                
-                # CORRECTION 3: Compare arguments to the concrete bound classes (Agent, WorldLayout, WorldObject)
-                if args[0] is not Agent:
-                    cls._min_agent_class = args[0]
-                if args[1] is not WorldLayout:
-                    cls._min_layout_class = args[1]
-                if args[2] is not WorldObject: # Assuming WorldObject is the bound/default
-                    cls._min_obj_class = args[2]
-                break
 
     @classmethod
     def _assert_agent_valid(cls, agent):
@@ -72,7 +58,7 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):
         
     @classmethod
     def _assert_layout_valid(cls, layout):
-        if not isinstance(object, cls._min_layout_class):
+        if not isinstance(layout, cls._min_layout_class):
             raise TypeError(f"Layout must be an instance of {cls._min_layout_class.__name__}")
         cls._assert_layout_locked(layout)
         
@@ -80,28 +66,32 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):
     # - - Instance Methods - - 
     
     def __init__(self, layout: L): 
-        self._assert_layout_valid()
+        self._assert_layout_valid(layout)
         self._layout: L = layout
 
-        self._agents: set[A] = {}
-        self._objects: set[O] = {}
+        self._agents: set[A] = set()
+        self._objects: set[O] = set()
 
-    def add_agent(self, agent: A):
+    def add_agent(self, agent: A) -> Self:
         self._assert_agent_valid(agent)
         self._agents.add(agent)
         agent._set_world(self)
         agent.reset()
+        return self
 
-    def add_object(self, object: O):
+    def add_object(self, object: O) -> Self:
         self._assert_object_valid(object)
         self._objects.add(object)
+        return self
 
-    def remove_agent(self, agent: A):
+    def remove_agent(self, agent: A) -> Self:
         self._agents.remove(agent)
         agent._clear_world()
+        return self
 
-    def remove_object(self, object: O):
+    def remove_object(self, object: O) -> Self:
         self._objects.remove(object)
+        return self
 
     def get_all_agents(self):
         return self._agents.copy()
@@ -109,26 +99,32 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):
     def get_all_objects(self):
         return self._objects.copy()
     
-    def clear_agents(self):
+    def clear_agents(self) -> Self:
         for agent in self._agents:
             agent._clear_world()
             agent.reset()
-
         self._agents.clear()
+        return self
 
-    def clear_objects(self):
+    def clear_objects(self) -> Self:
         self._objects.clear()
+        return self
+    
+    def clear_world(self) -> Self:
+        self.clear_agents()
+        self.clear_objects()
+        return self
 
     @abstractmethod
-    def _load_objects_from_layout(self):
-        pass
+    def _load_objects_from_layout(self) -> Self:
+        return self
 
     @abstractmethod
-    def _load_agents(self):
+    def _load_agents(self) -> Self:
         """
-        Loads a new batch of agnts into the world.
+        Loads a new batch of agents into the world.
         """
-        pass
+        return self
 
     @abstractmethod
     def tick(self):

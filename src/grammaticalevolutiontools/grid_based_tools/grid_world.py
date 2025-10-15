@@ -28,7 +28,12 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
     type ObjTrace = List[Tuple[ObjMarker]]
     type AgentTrace = List[Tuple[AgentMarker]]
- 
+
+    _min_agent_class = GridBasedAgent
+    _min_layout_class = GridLayout
+    _min_obj_class = GridWorldObject
+
+
     def __init__(self, layout: GridLayout, agents_can_share_spaces:bool=False):
         """
             Initializes an instance of a World object.
@@ -100,8 +105,8 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
     def update_obj_position(self, obj: O, old_pos: GridPosition):
         if old_pos is not None:
             self._object_positions[old_pos].remove(obj)
-        self._object_positions[obj.position].append(obj)
-        self.flag_obj_change()
+        self._object_positions[obj.pos].append(obj)
+        self.flag_object_change()
 
 
     # -- Position Query Functions
@@ -112,7 +117,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
     def position_passable(self, pos: GridPosition) -> bool:
         _objs = self.get_objects_at_position(pos)
         for obj in _objs:
-            if not obj.passable():
+            if not obj.is_passable():
                 return False  
             
         return True
@@ -131,29 +136,30 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
     # - - Object Manipulation - -
 
-    def add_object(self, obj_class: Type[GridWorldObject], position: GridPosition):
-        self._assert_obj_valid(obj_class)
-        self._assert_pos_valid_and_open_for_object(position, obj_class.is_passable())
+    def add_object(self, obj: GridWorldObject, position: GridPosition):
+        self._assert_object_valid(obj)
+        self._assert_pos_valid_and_open_for_object(position, obj.is_passable())
 
         _pos = GridPosition(position)
-        _obj = obj_class(world=self, pos=_pos)
 
-        self._object_positions[_pos].append(_obj)
-        self._objects.add(_obj)
+        self._object_positions[_pos].append(obj)
+        self._objects.add(obj)
+        obj._set_pos(_pos)
 
-        self.flag_obj_change()
+        self.flag_object_change()
     
     def remove_object(self, obj: GridWorldObject):
-        self._object_positions[obj.position].remove(obj)
+        self._object_positions[obj.pos].remove(obj)
         self._objects.remove(obj)
+        obj._set_pos(None)
 
-        self.flag_obj_change()
+        self.flag_object_change()
     
-    def clear_all_objects(self):
+    def clear_objects(self):
         self._object_positions.clear()
         self._objects.clear()
 
-        self.flag_obj_change()
+        self.flag_object_change()
     
     def get_objects_at_position(self, pos: GridPosition) -> list[GridWorldObject]:
         _pos = GridPosition(pos)
@@ -193,7 +199,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
     def _load_objects_from_layout(self):
         for pos, obj_class in self._layout.get_object_positions().items():
-            self.add_object(obj_class, pos)
+            self.add_object(obj_class(world=self), pos)
 
     def _load_agents(self, agent_pos_list):
         for agent_or_agent_type, pos in agent_pos_list:
@@ -202,8 +208,8 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
     def load_new_agents(self, new_agents_and_positions: list[Tuple[Union[GridBasedAgent, Type[GridBasedAgent]], GridPosition]],
                         recording_on=False):
         
-        self.clear_all_objects()
-        self.clear_all_agents()
+        self.clear_objects()
+        self.clear_agents()
         
         self._obj_trace.clear()
         self._agent_trace.clear()
@@ -213,7 +219,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
         self._recording = recording_on
 
-        self.flag_obj_change()
+        self.flag_object_change()
         self.flag_agent_change()
         
         if self._recording:
@@ -225,7 +231,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
         if self._recording:
             self._agents_changed = True
 
-    def flag_obj_change(self):
+    def flag_object_change(self):
         if self._recording:
             self._objs_changed = True
 
