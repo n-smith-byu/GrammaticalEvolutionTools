@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from grammaticalevolutiontools.agents import AgentProgramTree
 
 _MIN_SIGHT_RANGE = 1
-_MAX_SIGHT_RANGE = 3
+_MAX_SIGHT_RANGE = 1
 
 #############################################################################
 # Welcome to an example implementation of a Grammar for the SantaFe Problem.
@@ -60,7 +60,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
     class CodeNode(basic_nodes.RootNode):
         def _base_node_init(self):
             super()._base_node_init(token="<Code>",
-                                    possible_children=['ProgsNode'])
+                                    possible_children=['WallConditionNode'])
             
         def _custom_init(self):
             return super()._custom_init()
@@ -83,13 +83,12 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
                 num_children=1,
                 possible_children=[
                     'FoodConditionNode',
-                    'WallConditionNode',
                     'Progs2Node', 
                     'Progs3Node',
                     'OperationNode'
                 ])
             
-            self._set_child_probs(0, [0.35,0.34,0.2,0.2,0.01])
+            self._set_child_probs(0, [0.59,0.2,0.2,0.01])
 
         def _custom_init(self):
             return super()._custom_init()
@@ -179,7 +178,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             super()._base_node_init(
                 token='<WallCondition>',
                 label='if_wall_ahead',
-                possible_children_true=['ProgsNode'],
+                possible_children_true=['TurnRight', 'TurnLeft'],
                 possible_children_false=['ProgsNode'],
                 factor_possible_vals=[
                     ['RandDistNode']
@@ -207,9 +206,11 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
                 possible_children={
                     0:['TurnLeft', 
                        'TurnRight', 
+                       'TurnAround',
                        'MoveForward']
                     }
                 )
+            self._set_child_probs(0, [0.2, 0.2, 0.2, 0.4])
             
         def _custom_init(self):
             return super()._custom_init()
@@ -225,7 +226,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
     @as_grammar_node
     class TurnLeft(basic_nodes.ExecutableNode):
         def _base_node_init(self):
-            super()._base_node_init(token='Left')
+            super()._base_node_init(token='TurnLeft')
 
         def _custom_init(self):
             return super()._custom_init()
@@ -238,7 +239,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
     @as_grammar_node
     class TurnRight(basic_nodes.ExecutableNode):
         def _base_node_init(self):
-            super()._base_node_init(token='Right')
+            super()._base_node_init(token='TurnRight')
 
         def _custom_init(self):
             return super()._custom_init()
@@ -247,11 +248,24 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             self._program: AgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.turn_right()
+
+    @as_grammar_node
+    class TurnAround(basic_nodes.ExecutableNode):
+        def _base_node_init(self):
+            super()._base_node_init(token='TurnAround')
+
+        def _custom_init(self):
+            return super()._custom_init()
+
+        def execute(self):
+            self._program: AgentProgramTree
+            agent: SantaFeAgent = self._program.agent
+            agent.turn_around()
         
     @as_grammar_node
     class MoveForward(basic_nodes.ExecutableNode):
         def _base_node_init(self):
-            super()._base_node_init(token='Move')
+            super()._base_node_init(token='MoveForward')
 
         def _custom_init(self):
             return super()._custom_init()

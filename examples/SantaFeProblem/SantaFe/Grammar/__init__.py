@@ -1,18 +1,12 @@
-from .santafe_grammar import CodeNode
-from .santafe_grammar import ProgsNode, Progs2Node, Progs3Node
-from .santafe_grammar import FoodConditionNode, WallConditionNode
-from .santafe_grammar import OperationNode
-from .santafe_grammar import TurnLeft, TurnRight, MoveForward
-from .santafe_grammar import RandDistNode
 from .santafe_grammar import SantaFeGrammar
+from .santafe_grammar import MoveForward, TurnLeft, TurnRight, RandDistNode
+from .santafe_grammar import FoodConditionNode, WallConditionNode
+from .santafe_grammar import ProgsNode, Progs2Node, Progs3Node
+from .santafe_grammar import OperationNode
+from .santafe_grammar import CodeNode
 
-terminals = {TurnLeft, TurnRight, MoveForward, RandDistNode}
-non_terminals = {CodeNode, ProgsNode, Progs2Node, Progs3Node,
-                FoodConditionNode, WallConditionNode,
-                OperationNode}
+terminals = [MoveForward, TurnLeft, TurnRight, RandDistNode]
 
-__all__ = ['CodeNode', 'ProgsNode', 'Progs2Node', 'Progs3Node',
-           'FoodConditionNode', 'WallConditionNode', 'OperationNode',
-           'TurnLeft', 'TurnRight', 'MoveForward',
-           'RandDistNode', 
-           'SantaFeGrammar', 'terminals', 'non_terminals']
+__all__ = ['SantaFeGrammar', 'MoveForward', 'Turn Left', 'Turn Right',
+           'FoodConditionNode', 'WallConditionNode', 'ProgsNode', 'Progs2Node',
+           'Progs3Node', 'OperationNode', 'CodeNode']

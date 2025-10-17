@@ -1,22 +1,28 @@
-from collections.abc import Sequence
-from abc import abstractmethod
-
 import numpy as np
+
+from collections.abc import Sequence
+from numbers import Real
 
 
 class WorldPosition(Sequence):
 
     __array_priority__ = 10     # for predence with __eq__ with numpy arrays on the left side of ==
     _required_length: int | None = None
+    _dtype = Real
 
     def __init__(self, coords: Sequence):
+        if self._required_length is None:
+            raise TypeError("Can not instantiate a WorldPosition subclass without "
+                            "defining `_required_length` class method")
+        
+        self._assert_coords_valid(coords)
+        self._coords = tuple(int(i) for i in coords)
+
         super().__init__()
-        if self._coords_valid(coords):
-            self._coords = tuple(coords)
 
     def __init_subclass__(cls):
         super().__init_subclass__()
-        if (cls._required_length is not None) and (not isinstance(cls._required_length, int)):
+        if (cls._required_length is not None) and (not isinstance(cls._required_length, cls._dtype)):
             raise TypeError("`_required_length` must be an integer")
 
     def _is_array_like(self, obj):
@@ -26,16 +32,22 @@ class WorldPosition(Sequence):
 
         return (hasattr(obj, '__array__') or (hasattr(obj, '__iter__')) and not np.isscalar(obj))
     
-    def _coords_valid(self, obj):
-        if self._required_length == NotImplemented:
-            raise TypeError("Can not instantiate a WorldPosition subclass without "
-                            "defining `_required_length` class method")
+    def _assert_coords_valid(self, coords: Sequence):
+        if not self._is_array_like(coords):
+            raise TypeError("`coords` must be convertible to a numpy array")
+        if len(coords) != self._required_length:
+            raise ValueError(
+                f"{type(self).__name__} requires coords of length {self._required_length}. "
+                f"Found object of length {len(coords)}"
+                )
+        if not all(isinstance(x, self._dtype) for x in coords):
+            raise ValueError(
+                f"all element of `coords` must be of type {self._dtype.__name__}"
+            )
         
-        return self._is_array_like(obj) and len(obj) == self._required_length
-    
     @property
     def coords(self):
-        return np.array(self)         # reverse to put in [i,j] form ([height, width])
+        return np.array(self)        
     
     def __eq__(self, other):
         try:
@@ -46,7 +58,7 @@ class WorldPosition(Sequence):
         return np.all(self.coords == _other.coords)
     
     def __iter__(self):
-        return iter(self.coords)
+        return iter(self._coords)
     
     def __add__(self, other):
         _other = np.array(other)
@@ -65,7 +77,7 @@ class WorldPosition(Sequence):
         return self.coords[index]
     
     def __array__(self):
-        return self.coords
+        return np.array(self._coords)
     
     def __repr__(self):
         return str(self)

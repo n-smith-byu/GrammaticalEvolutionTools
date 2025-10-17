@@ -1,15 +1,18 @@
 from .grid_position import GridPosition
-from .grid_based_agent import GridBasedAgent
+from .grid_world_agent import GridWorldAgent
 from .grid_layout import GridLayout
 from .grid_world_object import GridWorldObject
 from .._base.world import World
-
-from .Animation import GridWorldAnimation, Color
+from .grid_world_animation import GridWorldAnimation, Color
 
 from collections import defaultdict
-from typing import Union, Type, Tuple, List, TypeVar, Generic
+from typing import Type, Tuple, List
 
-class GridWorld[A: GridBasedAgent = GridBasedAgent, 
+
+AgentStartState = Tuple[GridPosition, GridWorldAgent.Direction]
+
+
+class GridWorld[A: GridWorldAgent = GridWorldAgent, 
                 L: GridLayout = GridLayout, 
                 O: GridWorldObject = GridWorldObject](World[A, L, O]):
     """
@@ -23,15 +26,15 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
         __world (World): A private property. The world to which this reward belongs. 
     """
 
-    type AgentMarker = Tuple[Type[A], 'GridPosition', GridBasedAgent.Direction]
+    type AgentMarker = Tuple[Type[A], 'GridPosition', GridWorldAgent.Direction]
     type ObjMarker = Tuple[Type[O], 'GridPosition']
 
     type ObjTrace = List[Tuple[ObjMarker]]
     type AgentTrace = List[Tuple[AgentMarker]]
 
-    _min_agent_class = GridBasedAgent
-    _min_layout_class = GridLayout
+    _min_agent_class = GridWorldAgent
     _min_obj_class = GridWorldObject
+    _layout_class = GridLayout
 
 
     def __init__(self, layout: GridLayout, agents_can_share_spaces:bool=False):
@@ -168,17 +171,16 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
     # - - Agent Manipulation - -
     
-    def add_agent(self, agent: A, 
-                  pos: GridPosition):
-        
+    def add_agent(self, agent: A, pos: GridPosition, 
+                  dir: GridWorldAgent.Direction = None): 
         super().add_agent(agent)
         _pos = GridPosition(pos)
         self._agent_positions[_pos].add(agent)
-        agent._set_position(_pos)
+        agent._set_position(_pos, dir)
 
         self.flag_agent_change()
 
-    def remove_agent(self, agent: GridBasedAgent):
+    def remove_agent(self, agent: GridWorldAgent):
         super().remove_agent(agent)
         self._agent_positions[agent.position].remove(agent)
 
@@ -191,7 +193,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
         self.flag_agent_change()
 
-    def get_agents_at_position(self, pos: GridPosition) -> list[GridBasedAgent]:
+    def get_agents_at_position(self, pos: GridPosition) -> list[GridWorldAgent]:
         _pos = GridPosition(pos)
         return list(self._agent_positions[_pos])
     
@@ -201,11 +203,13 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
         for pos, obj_class in self._layout.get_object_positions().items():
             self.add_object(obj_class(world=self), pos)
 
-    def _load_agents(self, agent_pos_list):
-        for agent_or_agent_type, pos in agent_pos_list:
-            self.add_agent(agent_or_agent_type, pos)
+    def _load_agents(self, agent_start_states: dict[GridWorldAgent, AgentStartState]):
+        for agent in agent_start_states:
+            pos, dir = agent_start_states[agent]
+            self.add_agent(agent, pos, dir)
+            agent.reset()
 
-    def load_new_agents(self, new_agents_and_positions: list[Tuple[Union[GridBasedAgent, Type[GridBasedAgent]], GridPosition]],
+    def load_new_agents(self, new_agents: dict[GridWorldAgent, AgentStartState],
                         recording_on=False):
         
         self.clear_objects()
@@ -215,7 +219,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
         self._agent_trace.clear()
 
         self._load_objects_from_layout()
-        self._load_agents(new_agents_and_positions)
+        self._load_agents(new_agents)
 
         self._recording = recording_on
 
@@ -283,7 +287,7 @@ class GridWorld[A: GridBasedAgent = GridBasedAgent,
 
     # - - Create Animation - -
 
-    def generate_animation(self, bg_color, agent_colors: dict[Type['GridBasedAgent'], Color], 
+    def generate_animation(self, bg_color, agent_colors: dict[Type['GridWorldAgent'], Color], 
                            obj_colors: dict[Type['GridWorldObject'], Color], arrow_color=None):
         
         return GridWorldAnimation(world_dims = (self.height, self.width),

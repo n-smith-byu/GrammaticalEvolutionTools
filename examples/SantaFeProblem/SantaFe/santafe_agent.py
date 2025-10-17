@@ -1,5 +1,5 @@
-from grammaticalevolutiontools.grid_based_tools import \
-    GridBasedAgent, GridPosition
+from grammaticalevolutiontools.worlds.grid_world import \
+    GridWorldAgent, GridPosition
 
 from .santafe_food import SantaFeFood
 
@@ -9,11 +9,11 @@ if TYPE_CHECKING:
     from .santafe_world import SantaFeWorld
 
 
-class SantaFeAgent(GridBasedAgent):
+class SantaFeAgent(GridWorldAgent):
 
     @classmethod
     def default_grammar(cls):
-        if not cls.__default_program_cls:
+        if not cls._default_grammar:
             from .Grammar import SantaFeGrammar
             cls._default_grammar = SantaFeGrammar
 
@@ -26,16 +26,13 @@ class SantaFeAgent(GridBasedAgent):
     def _set_world(self, world: 'SantaFeWorld'):
         return super()._set_world(world)
 
-    def _set_position(self, pos: GridPosition):
-        return super()._set_position(pos)
-    
     def give_reward(self, amount):
         #print(f"<Reward: {self.position}, {amount}>")
         return super().give_reward(amount)
 
     def food_within(self, distance):
         for k in range(1, distance + 1):
-            curr_dir = SantaFeAgent.direction_to_vec(self._curr_dir)
+            curr_dir = SantaFeAgent.direction_to_vec(self._dir)
             space = self._pos + k * curr_dir
 
             obj = self._world.get_objects_at_position(space)
@@ -46,7 +43,7 @@ class SantaFeAgent(GridBasedAgent):
     
     def wall_within(self, distance):
         for k in range(1, distance + 1):
-            curr_dir = SantaFeAgent.direction_to_vec(self._curr_dir)
+            curr_dir = SantaFeAgent.direction_to_vec(self._dir)
             space = self._pos + k * curr_dir
 
             if not self._world.space_within_map_bounds(space):

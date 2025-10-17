@@ -29,8 +29,8 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):         # generics f
         if parent is not None:
             for attr, parent_attr in (
                 ("_min_agent_class", parent._min_agent_class),
-                ("_min_layout_class", parent._min_layout_class),
                 ("_min_obj_class", parent._min_obj_class),
+                ("_layout_class", parent._layout_class),
             ):
                 sub_attr = getattr(cls, attr)
                 if sub_attr is None:
@@ -49,7 +49,7 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):         # generics f
         
     @classmethod
     def _assert_object_valid(cls, object):
-        if not isinstance(object, cls._min_object_class):
+        if not isinstance(object, cls._min_obj_class):
             raise TypeError(f"Object must be an instance of {cls._min_obj_class.__name__}")
         
     @classmethod
@@ -64,7 +64,7 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):         # generics f
 
     @classmethod
     def base_object_class(cls):
-        return cls._min_object_class
+        return cls._min_obj_class
 
     @classmethod
     def layout_class(cls):
@@ -72,7 +72,7 @@ class World[A: Agent, L: WorldLayout, O: WorldObject](ABC):         # generics f
         
     
     _min_agent_class = Agent
-    _min_object_class = WorldObject
+    _min_obj_class = WorldObject
     _layout_class = WorldLayout
         
 

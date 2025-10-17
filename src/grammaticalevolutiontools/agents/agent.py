@@ -18,18 +18,18 @@ class Agent:
     
     @classmethod
     def default_program_cls(cls) -> Type[AgentProgramTree]:
-        if not cls.__default_program_cls:
+        mangled = f"_{cls.__name__}__default_program_cls"
+        
+        if not hasattr(cls, mangled):
             default_grammar = cls.default_grammar()
             if default_grammar:
                 class AgentProgram(AgentProgramTree):
                     _grammar = default_grammar
                     pass
-
-                cls.__default_program_cls = AgentProgram
+                setattr(cls, mangled, AgentProgram)
         
-        return cls.__default_program_cls
+        return getattr(cls, mangled, None)
     
-    __default_program_cls = None
     _default_grammar = None
     _requires_world = False
 

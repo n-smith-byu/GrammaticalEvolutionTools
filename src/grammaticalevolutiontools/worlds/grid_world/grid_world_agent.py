@@ -11,7 +11,7 @@ from enum import Enum
 if TYPE_CHECKING:
     from .grid_world import GridWorld
 
-class GridBasedAgent(Agent):
+class GridWorldAgent(Agent):
 
     ######################################
     # -- Class Properties and Methods -- #
@@ -28,14 +28,14 @@ class GridBasedAgent(Agent):
             if not isinstance(value, Integral):
                 raise TypeError(f"Unsupported operand type(s) for +=: 'Direction' and '{type(value).__name__}'")
             
-            return GridBasedAgent.Direction((self.value + value) % 4) 
+            return GridWorldAgent.Direction((self.value + value) % 4) 
         
         # Override subtraction to wrap around
         def __sub__(self, value):
             if not isinstance(value, Integral):
                 raise TypeError(f"Unsupported operand type(s) for +=: 'Direction' and '{type(value).__name__}'")
             
-            return GridBasedAgent.Direction((self.value - value) % 4) 
+            return GridWorldAgent.Direction((self.value - value) % 4) 
         
         def __eq__(self, value):
             return self.value == value
@@ -66,11 +66,11 @@ class GridBasedAgent(Agent):
     ###############################
 
     def __init__(self, program: AgentProgramTree = None, autogen=True):
-        super(GridBasedAgent, self).__init__(program, autogen)
+        super(GridWorldAgent, self).__init__(program, autogen)
 
         self._world: 'GridWorld'
         self._pos: GridPosition = None
-        self._curr_dir: GridBasedAgent.Direction = GridBasedAgent.Direction.RIGHT
+        self._dir: GridWorldAgent.Direction = GridWorldAgent.Direction.RIGHT
 
     def _set_world(self, world: 'GridWorld'):
         from .grid_world import GridWorld
@@ -84,7 +84,7 @@ class GridBasedAgent(Agent):
         super()._clear_world()
         self._pos = None
 
-    def _set_position(self, pos: GridPosition):
+    def _set_position(self, pos: GridPosition, dir: Direction = None):
         """
             Sets the world and position of an agent in the world. 
             Reserved for use by World class to add agents internally.
@@ -98,6 +98,8 @@ class GridBasedAgent(Agent):
             raise Agent.WorldNotSetError("Cannot set position of agent in world when world is not set")
         
         self._pos = GridPosition(pos)
+        if dir is not None:
+            self._dir = dir
 
 
     # -- Assertions --
@@ -130,23 +132,23 @@ class GridBasedAgent(Agent):
         self._on_action_taken()
 
     def turn_left(self):
-        self._curr_dir -= 1
+        self._dir -= 1
         self._on_action_taken()
         self._on_changed_direction()
 
     def turn_right(self):
-        self._curr_dir += 1
+        self._dir += 1
         self._on_action_taken()
         self._on_changed_direction()
 
     def turn_around(self):
-        self._curr_dir += 2
+        self._dir += 2
         self._on_action_taken()
         self._on_changed_direction()
 
     def move_forward(self, ignore_other_agents=False):
         _old_pos = self._pos
-        new_pos = self._pos + GridBasedAgent._DIRECTIONS[self._curr_dir]
+        new_pos = self._pos + GridWorldAgent._DIRECTIONS[self._dir]
         
         if self._world.space_valid_and_open(new_pos):
             if ignore_other_agents or not self._world.position_occupied(new_pos):
@@ -163,7 +165,7 @@ class GridBasedAgent(Agent):
     
     @property
     def direction(self) -> Direction:
-        return self._curr_dir
+        return self._dir
     
     # - - Magic Methods - -
 
@@ -177,5 +179,5 @@ class GridBasedAgent(Agent):
                f"world={type(self._world).__name__ if self._world is not None else 'None'}, " + \
                f"program={program_str}, " + \
                f"pos={self._pos if self._pos is not None else 'None'}, " + \
-               f"dir={self._curr_dir.name}, " + \
+               f"dir={self._dir.name}, " + \
                f"rewards={self._score})"
