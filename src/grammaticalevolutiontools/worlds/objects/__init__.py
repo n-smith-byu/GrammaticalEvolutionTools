@@ -1,3 +1,4 @@
-from .world_object import WorldObject
+from .._base.object import WorldObject
+from .reward import Reward
 
-__all__ = ['WorldObject']
+__all__ = ['WorldObject', 'Reward']

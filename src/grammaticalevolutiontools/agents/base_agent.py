@@ -18,19 +18,19 @@ class Agent:
     
     @classmethod
     def default_program_cls(cls) -> Type[AgentProgramTree]:
-        if not cls._default_program_cls:
+        if not cls.__default_program_cls:
             default_grammar = cls.default_grammar()
             if default_grammar:
                 class AgentProgram(AgentProgramTree):
                     _grammar = default_grammar
                     pass
 
-                cls._default_program_cls = AgentProgram
+                cls.__default_program_cls = AgentProgram
         
-        return cls._default_program_cls
+        return cls.__default_program_cls
     
+    __default_program_cls = None
     _default_grammar = None
-    _default_program_cls = None
     _requires_world = False
 
     # - - Exceptions - - 
