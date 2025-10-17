@@ -13,7 +13,7 @@ class SantaFeAgent(GridBasedAgent):
 
     @classmethod
     def default_grammar(cls):
-        if not cls._default_program_cls:
+        if not cls.__default_program_cls:
             from .Grammar import SantaFeGrammar
             cls._default_grammar = SantaFeGrammar
 
