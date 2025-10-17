@@ -2,7 +2,6 @@ from .._base.object import WorldObject
 from .grid_position import GridPosition
 
 from abc import abstractmethod
-from enum import Enum
 
 from typing import TYPE_CHECKING
 
@@ -17,7 +16,7 @@ class GridWorldObject(WorldObject):
     def is_passable(self) -> bool:
         return NotImplemented
 
-    def __init__(self, world: 'GridWorld', pos = None):
+    def __init__(self, world: 'GridWorld'):
 
         super(GridWorldObject, self).__init__(world)
         self._assert_world_is_grid_world(world)
@@ -31,12 +30,17 @@ class GridWorldObject(WorldObject):
     def _assert_world_is_grid_world(self, world):
         from .grid_world import GridWorld
         if not isinstance(world, GridWorld):
-                raise TypeError('world must be an instance of GridWorld')
+                raise TypeError(
+                    "`world` must be an instance of GridWorld"
+                    )
 
     def is_passable(self) -> bool:
         return self._is_passable
 
     def _set_pos(self, pos: GridPosition):
+        """
+        Sets the position of the object. Intended for internal use by GridWorld class. 
+        """
         self._pos = pos
 
     @property

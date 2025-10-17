@@ -1,4 +1,4 @@
 from .._base.layout import WorldLayout
-from .._base.position import Position
+from ..grid_world import GridLayout
 
-__all__ = ['WorldLayout']
+__all__ = ['WorldLayout', 'GridLayout']

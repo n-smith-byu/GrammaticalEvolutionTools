@@ -1,13 +1,10 @@
-from grammaticalevolutiontools.grid_based_tools import \
+from grammaticalevolutiontools.worlds.grid_world import \
     GridWorld, GridLayout, GridPosition
-
 from .santafe_agent import SantaFeAgent
 from .santafe_food import SantaFeFood
 
 import importlib.resources
 from pathlib import Path
-
-from typing import Type, TypeVar, ClassVar
 
 
 # Defining a layout consisting of the Santa Fe Trail
@@ -39,7 +36,7 @@ class SantaFeWorld(GridWorld[SantaFeAgent, SantaFeLayout]):
 
     def reset_with_agent(self, agent: SantaFeAgent, start: GridPosition=GridPosition((0,0)), recording_on=False):
         return super().load_new_agents(
-            [(agent, start)],
+            {agent: (start, agent.Direction.RIGHT)},
             recording_on=recording_on
         )
 

@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.grid_based_tools import \
+from grammaticalevolutiontools.worlds.grid_world import \
     GridWorldReward, GridPosition
 from typing import TYPE_CHECKING
 

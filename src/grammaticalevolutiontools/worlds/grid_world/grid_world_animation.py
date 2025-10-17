@@ -1,12 +1,14 @@
-from ..grid_based_agent import GridBasedAgent
+from .grid_world_agent import GridWorldAgent
+from ...animation import WorldAnimation
 
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.patches import FancyArrow
 from matplotlib.colors import LinearSegmentedColormap, to_rgb
 from scipy.sparse import coo_matrix, lil_matrix
-import seaborn as sns
 
 from itertools import chain
 from typing import Union, Type, Tuple, TYPE_CHECKING
-
 from collections import defaultdict
 
 if TYPE_CHECKING:
@@ -16,21 +18,21 @@ if TYPE_CHECKING:
 
 # -- Type Annotations --
 
-Color = Union[str, Tuple[float, float, float], Tuple[int, int, int]]
-Arrow = Tuple[float, float, float, float, Color, float]         # Tuple[x, y, dx, dy, color, width]
-Frame = Tuple[coo_matrix, list[Arrow]]
+type Color = Union[str, Tuple[float, float, float], Tuple[int, int, int]]
+type Arrow = Tuple[float, float, float, float, Color, float]         # Tuple[x, y, dx, dy, color, width]
+type Frame = Tuple[coo_matrix, list[Arrow]]
 
 # -- Animation Class -- 
 
-class GridWorldAnimation:
+class GridWorldAnimation(WorldAnimation):
     def __init__(self, world_dims: Tuple[int, int], 
                  world_obj_trace: 'GridWorld.ObjTrace', 
                  world_agent_trace: 'GridWorld.AgentTrace', 
                  obj_colors: dict[Type['GridWorldObject'], Color], 
-                 agent_colors: dict[Type[GridBasedAgent], Color],
+                 agent_colors: dict[Type[GridWorldAgent], Color],
                  bg_color: Color, 
-                 arrow_color: Union[Color, dict[Type[GridBasedAgent], Color]] = None):
-        
+                 arrow_color: Union[Color, dict[Type[GridWorldAgent], Color]] = None):
+
         if arrow_color is None or isinstance(arrow_color, dict):
              _arrow_colors_dict = arrow_color
         else:
@@ -39,14 +41,11 @@ class GridWorldAnimation:
         self._CMAP, _class_to_color_index = self._create_custom_cmap(bg_color, agent_colors, obj_colors)
         self._frames: list[Frame] = self._create_frames(world_dims, world_obj_trace, world_agent_trace,
                                                         _class_to_color_index, _arrow_colors_dict)
-        
-        self.fig = None
-        self.ax = None
-
+        super().__init__()
 
     # - - Private Helpers - -
 
-    def _create_custom_cmap(self, bg: Color, agent_colors: dict[Type['GridBasedAgent'], Color], 
+    def _create_custom_cmap(self, bg: Color, agent_colors: dict[Type['GridWorldAgent'], Color], 
                             obj_colors: dict[Type['GridWorldObject'], Color]):
             all_colors = []
             class_to_color_index = {}
@@ -64,26 +63,26 @@ class GridWorldAnimation:
             return custom_cmap, class_to_color_index
     
     def _create_frames(self, world_dims, obj_trace: 'GridWorld.ObjTrace', 
-                             agent_trace: 'GridWorld.AgentTrace',
-                             class_to_color_index,
-                             arrow_colors_dict: dict[Type[GridBasedAgent], Color]) -> list[Frame]:
-            frames = []
-            for frame in zip(obj_trace, agent_trace):
-                grid = lil_matrix(world_dims)
-                objs_in_frame, agents_in_frame = frame
+                        agent_trace: 'GridWorld.AgentTrace',
+                        class_to_color_index,
+                        arrow_colors_dict: dict[Type[GridWorldAgent], Color]) -> list[Frame]:
+        frames = []
+        for frame in zip(obj_trace, agent_trace):
+            grid = lil_matrix(world_dims)
+            objs_in_frame, agents_in_frame = frame
 
-                for obj_cls, pos in objs_in_frame:
-                    grid[*pos.coords] = class_to_color_index[obj_cls]
+            for obj_cls, pos in objs_in_frame:
+                grid[*pos.coords] = class_to_color_index[obj_cls]
 
-                arrows: list[Arrow] = []
-                for agent_cls, pos, _dir in agents_in_frame:
-                    grid[*pos.coords] = class_to_color_index[agent_cls]
-                    if arrow_colors_dict is not None:
-                        arrows.append(self._create_arrow(pos, _dir, agent_cls, arrow_colors_dict))
+            arrows: list[Arrow] = []
+            for agent_cls, pos, _dir in agents_in_frame:
+                grid[*pos.coords] = class_to_color_index[agent_cls]
+                if arrow_colors_dict is not None:
+                    arrows.append(self._create_arrow(pos, _dir, agent_cls, arrow_colors_dict))
 
-                frames.append((grid.tocoo(), arrows))
-            
-            return frames
+            frames.append((grid.tocoo(), arrows))
+        
+        return frames
     
     def _create_arrow(self, agent_pos, agent_dir, agent_class, arrow_colors_dict) -> Arrow:
         """
@@ -101,7 +100,7 @@ class GridWorldAnimation:
         y = row
 
         # direction vector (dy, dx) in cell coordinates
-        dir_vec = GridBasedAgent.direction_to_vec(agent_dir)  # assume returns (dy, dx)
+        dir_vec = GridWorldAgent.direction_to_vec(agent_dir)  # assume returns (dy, dx)
         dy, dx = dir_vec
 
         # move starting point forward slightly in the direction the agent is facing
@@ -114,21 +113,16 @@ class GridWorldAnimation:
 
         # return as (x, y, dx, dy, color, width)
         return (x, y, dx, dy, arrow_colors_dict[agent_class], 0.2)
-
+    
 
     # - - Public Methods - -
 
-    def play(self, pause=200):
+    def play(self, pause=200) -> FuncAnimation:
         """
         Plays the animation in a notebook-friendly way using blitting for speed.
         Returns the FuncAnimation object. Keep a reference to it!
         """
-        import matplotlib.pyplot as plt
-        from matplotlib.animation import FuncAnimation
-        from matplotlib.patches import FancyArrow
-
-        if self.fig is not None:
-            plt.close(self.fig)
+        self.close()        # close previous animation if open
 
         self.fig, self.ax = plt.subplots()
         self.ax.set_aspect('equal')

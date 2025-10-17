@@ -3,6 +3,7 @@ from .grid_world_object import GridWorldObject
 from .grid_position import GridPosition
 
 import numpy as np
+
 from typing import Type, Self
 import numbers
 
@@ -84,7 +85,7 @@ class GridLayout(WorldLayout):
         
     def assert_space_within_map_bounds(self, pos: GridPosition):
         _pos = GridPosition(pos)
-        if not self.space_within_map_bounds(pos):
+        if not self.space_within_map_bounds(_pos):
             raise GridLayout.InvalidPositionError('pos not within the bounds of the World.')
 
     # -- Modifying the Layout
@@ -264,6 +265,4 @@ class GridLayout(WorldLayout):
             self.lock()
 
         return self
-
-
 

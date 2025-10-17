@@ -1,4 +1,4 @@
-from .._base.object import WorldObject
+from .object import WorldObject
 
 from typing import TYPE_CHECKING
 from abc import ABC
@@ -42,6 +42,11 @@ class Reward(ABC):
             raise TypeError("Cannot instantiate a Reward class that does not also inherit from WorldObject.")
         
         return super().__new__(cls)
+    
+    def _give_reward(self, agent: 'Agent'):
+        _yield = min(self._base_yield, self._remaining_amount)
+        agent.give_reward(_yield)
+        self._remaining_amount -= _yield
 
     @property
     def remaining(self) -> float:
