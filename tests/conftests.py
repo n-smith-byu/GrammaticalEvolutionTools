@@ -47,12 +47,12 @@ class EmptyLayout(WorldLayout):
 
 class BasicWorld(World):
 
-    __layout = EmptyLayout(lock=True)
     _min_agent_class = BasicWorldAgent
+    _layout_class = EmptyLayout
 
     def __init__(self):
         super(BasicWorld, self).__init__(agent_class=[BasicWorldAgent], obj_types=[], 
-                                         world_layout=BasicWorld.__layout)
+                                         world_layout=EmptyLayout(lock=True))
         
     def tick(self):
         for agent in self._agents:
@@ -65,7 +65,7 @@ class BasicWorld(World):
         pass
 
 
-# - - Grammar - - 
+# - - Nodes - - 
 
 class CodeNode(RootNode):
     def _base_node_init(self):
@@ -92,5 +92,6 @@ class ChildNode(ExecutableNode):
         print(ChildNode.PRINT_STR, end='')
 
     
+
 
     

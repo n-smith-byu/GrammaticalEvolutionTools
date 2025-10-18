@@ -2,7 +2,6 @@ from .meta import BaseNodeMeta
 
 from abc import abstractmethod
 import warnings
-import random
 import uuid
 
 import numpy as np
@@ -424,7 +423,7 @@ class BaseNode(metaclass=BaseNodeMeta):
 
     # - - Literals - - 
 
-    CollectionReason = Literal["collect", "add", "pop"]
+    TraversalMode = Literal["attach", "detach"] | None
 
     # - - User Methods - -
 
@@ -444,7 +443,7 @@ class BaseNode(metaclass=BaseNodeMeta):
         self._depth: int = 0
         self._attr_cache: dict[str, Any] = {}
 
-    def get_next_available_slot(self, node_type: Type['BaseNode']):
+    def get_next_available_slot(self, node_type: Type['BaseNode']) -> int | None:
         """Finds the next available (empty) child slot that can accept a given node type.
 
         This method searches for the lowest index in `_children` that is currently
@@ -560,20 +559,19 @@ class BaseNode(metaclass=BaseNodeMeta):
                 f"of type {type(self)}.\n"
                 f"Permitted types include {permitted_types}"
             )
+        if new_child._parent is not None:
+            raise ValueError("New child already has a parent.")
 
         self._children[index] = new_child
         self._num_children += 1
 
-        properties = self._get_properties_to_pass_to_children()
-        new_child._set_properties(properties)
-
         try:
-            new_child.collect_descendants(reason='add')
+            self.collect_descendants(traversal_mode='attach')
         except RuntimeError as e:
             self._children[index] = None
             self._num_children -= 1
 
-            raise ValueError('New child caused a cycle.') from e
+            raise ValueError("New child caused a cycle.") from e
 
         return index
 
@@ -603,10 +601,9 @@ class BaseNode(metaclass=BaseNodeMeta):
         self._num_children -= 1
         
         if child:
-            properties = self._get_properties_for_removed_child()
+            properties = self._get_properties_for_popped_child()
             child._set_properties(properties)
-
-            child.collect_descendants(reason='pop')
+            child.collect_descendants(traversal_mode='detach')
 
         return child
     
@@ -664,7 +661,7 @@ class BaseNode(metaclass=BaseNodeMeta):
 
         self._num_children = 0
 
-    def collect_descendants(self, reason: CollectionReason) -> set['BaseNode']:
+    def collect_descendants(self, traversal_mode: TraversalMode = None) -> set['BaseNode'] | None:
         """Collects all descendant nodes reachable from this node, optionally including itself.
 
         This method performs a depth-first traversal to gather all nodes
@@ -690,9 +687,9 @@ class BaseNode(metaclass=BaseNodeMeta):
             If a cycle is detected in the tree structure (a node is encountered more than once).
         """
         node_set = set()
-        if not self._collect_descendants(node_set, reason):
-            if reason in ['add', 'pop']:
-                self._rollback_changes(node_set, reason)
+        if not self._collect_descendants(node_set, traversal_mode):
+            if traversal_mode in ['attach', 'detach']:
+                self._rollback_changes(node_set, traversal_mode)
             raise BaseNode.CycleDetectedError(
                 "Cycle encountered in node tree. All changes rolled back."
                 )
@@ -702,7 +699,7 @@ class BaseNode(metaclass=BaseNodeMeta):
     # - - Helper Methods - -
 
     def _collect_descendants(self, visited: set['BaseNode'],
-                             reason: CollectionReason) -> bool:
+                             traversal_mode: TraversalMode) -> bool:
         """Recursively collects descendants for :py:meth:`~.BaseNode.collect_descendants`.
 
         This is an internal helper method used for the recursive traversal.
@@ -723,39 +720,39 @@ class BaseNode(metaclass=BaseNodeMeta):
         if self in visited:
             return False
             
-        self._on_collect_descendants(reason)
         visited.add(self)
+        self._on_collect_descendants(traversal_mode)
         
-        modifying_children = reason in ['add', 'pop']
+        modifying_children = traversal_mode in ['attach', 'detach']
         properties = (modifying_children and \
                       self._get_properties_to_pass_to_children()) or {}
         
         for child in self._children:
             if child is not None:
                 child._set_properties(properties)
-                if not child._collect_descendants(visited, reason):
+                if not child._collect_descendants(visited, traversal_mode):
                     return False
         
         return True
     
-    def _on_collect_descendants(self, reason: CollectionReason):
-        if reason == 'add':
-            self._on_collect_descendants_add()
-        if reason == 'pop':
-            self._on_collect_descendants_pop()
+    def _on_collect_descendants(self, options: TraversalMode):
+        if 'attach' in options:
+            self._on_collect_descendants_attach()
+        if 'detach' in options:
+            self._on_collect_descendants_detach()
     
     def _rollback_changes(self, visited: set['BaseNode'], 
-                          collection_reason: CollectionReason):
-        if collection_reason not in ['add', 'pop']:
+                          traversal_mode: TraversalMode):
+        if traversal_mode not in ['attach', 'detach']:
             return
         
         for node in visited:
             node._rollback_properties()
 
-            if collection_reason == 'add':
-                node._rollback_add()
-            if collection_reason == 'pop':
-                node._rollback_pop()
+            if traversal_mode == 'attach':
+                node._rollback_detach()
+            if traversal_mode == 'detach':
+                node._rollback_attach()
 
     def _copy_children_from(self, other: 'BaseNode'):
         """Copies the children structure from another node of the same type.
@@ -808,7 +805,7 @@ class BaseNode(metaclass=BaseNodeMeta):
         self._attr_cache['_parent'] = self._parent
         self._attr_cache['_depth'] = self._depth
 
-    def _get_properties_for_removed_child(self):
+    def _get_properties_for_popped_child(self):
         return {'_parent': None,
                 '_depth': 0}
         
@@ -816,16 +813,16 @@ class BaseNode(metaclass=BaseNodeMeta):
         return {'_parent': self, 
                 '_depth': self._depth + 1} 
     
-    def _on_collect_descendants_add(self):
+    def _on_collect_descendants_attach(self):
         pass
 
-    def _on_collect_descendants_pop(self):
+    def _on_collect_descendants_detach(self):
         pass
 
-    def _rollback_pop(self):
+    def _rollback_attach(self):
         pass
 
-    def _rollback_add(self):
+    def _rollback_detach(self):
         pass
 
 

@@ -1,4 +1,4 @@
-from ..programs.tree import ProgramTree
+from ..programs.program_tree import ProgramTree
 from ..programs.mods import GrammarProgramAddin
 
 from typing import TYPE_CHECKING
