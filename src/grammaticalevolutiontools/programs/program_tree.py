@@ -190,7 +190,7 @@ class ProgramTree:
         self._level_counts.clear()
 
         self._root._program = self
-        self._root.collect_descendants(reason='add')
+        self._root.collect_descendants(traversal_mode='add')
         self._cache_depth()
 
     def _fill_out_program(self):

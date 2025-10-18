@@ -1,14 +1,14 @@
-from ..._base_node.base_node import BaseNode
+from ..nodes.base_node import BaseNode
 
 import warnings
 import inspect
 
 import numpy as np
 
-from typing import Type, Any, Optional, Tuple, TYPE_CHECKING
+from typing import Type, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..tree import ProgramTree
+    from .program_tree import ProgramTree
 
 
 class ProgramNode(BaseNode):
@@ -533,18 +533,18 @@ class ProgramNode(BaseNode):
         properties['_program'] = self._program
         return properties
     
-    def _get_properties_for_removed_child(self):
-        properties = BaseNode._get_properties_for_removed_child(self)
+    def _get_properties_for_popped_child(self):
+        properties = BaseNode._get_properties_for_popped_child(self)
         properties['_program'] = None
         return properties
     
-    def _on_collect_descendants_add(self):
+    def _on_collect_descendants_attach(self):
         if self._program and not (self in self._program._nodes):
             self._program._nodes.add(self)
             self._program._nodes_by_type[type(self)].add(self)
             self._program._level_counts[self._depth] += 1
 
-    def _on_collect_descendants_pop(self):
+    def _on_collect_descendants_detach(self):
         program: ProgramTree = self._attr_cache['_program']
         if program and (self in program._nodes):
             original_depth = self._attr_cache['_depth']
@@ -560,11 +560,11 @@ class ProgramNode(BaseNode):
             if not program._level_counts[original_depth]:
                 program._level_counts.pop(original_depth)   
 
-    def _rollback_add(self):
-        self._on_collect_descendants_pop()
+    def _rollback_detach(self):
+        self._on_collect_descendants_detach()
 
-    def _rollback_pop(self):
-        self._on_collect_descendants_add()
+    def _rollback_attach(self):
+        self._on_collect_descendants_attach()
 
 
     # - - Properties - -

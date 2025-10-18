@@ -13,6 +13,7 @@ class GrammarProgramMeta(type):
         return super().__call__(*args, **kwds)
 
 class GrammarProgramAddin(metaclass=GrammarProgramMeta):
+    
     _grammar = NotImplemented
 
     def __init_subclass__(cls):

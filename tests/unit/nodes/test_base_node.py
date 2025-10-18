@@ -1,23 +1,29 @@
-from grammaticalevolutiontools._base_node import BaseNode
+from grammaticalevolutiontools.nodes import BaseNode
 
-import warnings
 import numpy as np
-
 import pytest
 
-class MockRootNode(BaseNode):
+import warnings
+
+
+class MockNode2Children(BaseNode):
+
+    def __init__(self):
+        super().__init__()
+        self._possible_children = {
+            0: [MockNodeNoChildren],
+            1: [MockNode1Child, MockNodeNoChildren]
+        }
+
     @property
     def _possible_children_dict(self):
-        return {
-            0: [MockChildNode, MockChildNode],
-            1: [MockMiddleNode, MockChildNode]
-        }
+        return self._possible_children
     @property
     def _special_probs_dict(self):
         return {1: [3, 10]}
     @property
     def _all_possible_children(self):
-        return {MockChildNode, MockMiddleNode}
+        return {MockNodeNoChildren, MockNode1Child}
     @property
     def max_num_children(self):
         return 2
@@ -33,8 +39,34 @@ class MockRootNode(BaseNode):
     @property
     def is_root(self):
         return True
+    
+class MockNode1Child(BaseNode):
+    @property
+    def _possible_children_dict(self):
+        return {0: [MockNodeNoChildren, MockNode1Child, MockNode2Children]}
+    @property
+    def _special_probs_dict(self):
+        return {}
+    @property
+    def _all_possible_children(self):
+        return {MockNodeNoChildren, MockNode1Child}
+    @property
+    def max_num_children(self):
+        return 1
+    @property
+    def label(self):
+        return "child1"
+    @property
+    def token(self):
+        return "C1"
+    @property
+    def is_terminal(self):
+        return False
+    @property
+    def is_root(self):
+        return False
 
-class MockChildNode(BaseNode):
+class MockNodeNoChildren(BaseNode):
     @property
     def _possible_children_dict(self):
         return {}
@@ -59,38 +91,17 @@ class MockChildNode(BaseNode):
     @property
     def is_root(self):
         return False
-    
-class MockMiddleNode(BaseNode):
-    @property
-    def _possible_children_dict(self):
-        return {0: [MockChildNode, MockMiddleNode]}
-    @property
-    def _special_probs_dict(self):
-        return {}
-    @property
-    def _all_possible_children(self):
-        return {MockChildNode, MockMiddleNode}
-    @property
-    def max_num_children(self):
-        return 1
-    @property
-    def label(self):
-        return "child1"
-    @property
-    def token(self):
-        return "C1"
-    @property
-    def is_terminal(self):
-        return False
-    @property
-    def is_root(self):
-        return False
 
-# ---------------------
-# Assertion Method Tests
-# ---------------------
 
-# Testing Basic Assertions
+# - - - - - - - - - - - -
+# - - - - Tests - - - - - 
+# - - - - - - - - - - - -
+
+
+# ---- Static Assertion Method Tests ----
+
+
+# Basic Assertions
 
 def test_assert_token_valid():
     BaseNode._assert_token_valid("abc")
@@ -127,7 +138,7 @@ def test_assert_tags_valid():
         BaseNode._assert_tags_valid(is_terminal=True, is_root=True)
 
 
-# Testing Complex Assertions
+# Complex Assertions
 
 class TestPossibleChildrenDictAssertions:
 
@@ -202,7 +213,7 @@ class TestSpecialChildProbsDictAssertions:
             assert any("Unused inds" in str(warning.message) for warning in w)
 
 
-class TestChildProbsAssertions:
+class TestChildProbsValsAssertions:
 
     """test assert_child_probs_valid"""
 
@@ -211,7 +222,7 @@ class TestChildProbsAssertions:
 
     def test_assert_child_probs_valid_non_1d_array(self):
         with pytest.raises(ValueError, 
-                           match="Could not convert to a 1-D numpy array"):
+                           match="`child_probs` must be an 1d array. Found an array with 2 dimensions."):
             BaseNode._assert_child_probs_valid(
                 child_probs=[[0.5, 0.5], 
                              [0.4, 0.7]], 
@@ -228,9 +239,8 @@ class TestChildProbsAssertions:
             BaseNode._assert_child_probs_valid("not a valid array", [int, str])
 
 
-# ---------------------
-# Probabilities and Static Utils
-# ---------------------
+
+# ---- Probabilities and Static Utils Tests ----
 
 def test_probs_to_numpy():
     arr = BaseNode.probs_to_numpy([0.2, 0.8])
@@ -249,36 +259,38 @@ def test_convert_probs_dict_to_numpy():
     assert all(np.all(probs_dict[key] == converted[key]) for key in probs_dict)
 
 def test_get_possible_children_and_probs():
-    node = MockRootNode()
+    node = MockNode2Children()
     children, probs = node.get_possible_children_and_probs(0)
     assert isinstance(children, list)
     assert isinstance(probs, np.ndarray)
     assert np.isclose(probs.sum(), 1.0)
 
-# ---------------------
-# Child Management Tests
-# ---------------------
 
-class TestBaseNodeBehavior:
+
+# ---- Test Basic Methods ----
+
+class TestBaseNodeBasicBehavior:
 
     # - - Test init and property methods - -
 
     @staticmethod
     def test_init_function():
-        node1 = MockRootNode()
+        node1 = MockNode2Children()
         
         assert node1.children == [None, None]
         assert node1._num_children == 0
         assert node1._depth == 0
+        assert node1._attr_cache == {}
+        assert node1._parent is None
 
-        node2 = MockRootNode()
+        node2 = MockNode2Children()
         assert node2._identifier != node1._identifier
 
     @staticmethod
     def test_basic_property_methods():
-        node = MockRootNode()
-        node._children[0] == MockMiddleNode()
-        node._children[1] == MockChildNode()
+        node = MockNode2Children()
+        node._children[0] == MockNode2Children()
+        node._children[1] == MockNodeNoChildren()
 
         assert node.num_children == node._num_children
         assert node.child_depth == node._depth + 1
@@ -287,7 +299,7 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_possible_children_dict_property_method():
-        node = MockRootNode()
+        node = MockNode2Children()
         pc = node.possible_children_dict
 
         assert pc is not node._possible_children_dict
@@ -302,7 +314,7 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_child_probs_dict_property_method():
-        node = MockRootNode()
+        node = MockNode2Children()
         sp = node.special_probs_dict
 
         assert sp is not node._special_probs_dict
@@ -315,13 +327,206 @@ class TestBaseNodeBehavior:
             assert sp[ind] is not probs_list
             assert sp[ind] == probs_list
 
+    @staticmethod
+    def test_get_next_available_slot():
+        node = MockNode2Children()
+
+        # tet with one possible node type
+        node._possible_children = {
+            0: [int],
+            1: [int]
+            }
+
+        node._children = [None, None]
+        assert node.get_next_available_slot(int) == 0
+
+        node._children = [None, 1]
+        assert node.get_next_available_slot(int) == 0
+
+        node._children = [1, None]
+        assert node.get_next_available_slot(int) == 1
+
+        node._children = [1, 2]
+        assert node.get_next_available_slot(int) is None
+
+
+        # test with mixed node types 
+        node._possible_children = {
+            0: [MockNodeNoChildren],
+            1: [MockNodeNoChildren, int]}
+        
+        node._children = [MockNodeNoChildren(), None]
+        assert node.get_next_available_slot(int) == 1
+
+        node._children = [None, MockNodeNoChildren()]
+        assert node.get_next_available_slot(int) is None
+
+    @staticmethod
+    def test_get_child_at_index():
+        node = MockNode2Children()
+        node._possible_children = {
+            0: [int],
+            1: [int]
+            }
+        
+        node._children = [1, 2]
+        assert node.get_index_of_child(1) == 0
+        assert node.get_index_of_child(2) == 1
+
+    @staticmethod
+    def test_get_parent():
+        parent = MockNode2Children()
+        child = MockNode1Child()
+
+        parent._children = [None, child]
+        child._parent = parent
+
+        assert child.get_parent() == (parent, 1)
+
+
+# ---- Child Management (Removing, Adding, etc.)
+
+class TestBaseNodeChildManagement:
+
+    @staticmethod
+    def test_collect_descendants_basic_success():
+        root = MockNode2Children()
+        inter = MockNode1Child()
+        c1 = MockNodeNoChildren()
+        c2 = MockNodeNoChildren()
+
+        root._children = [c1, inter]
+        inter._children = [c2]
+
+        # test root get descendants
+        assert root.collect_descendants(traversal_mode='collect') == set([root, inter, c1, c2])
+        assert inter.collect_descendants(traversal_mode='collect') == set([inter, c2])
+        assert c1.collect_descendants(traversal_mode='collect') == set([c1])
+
+    @staticmethod
+    def test_collect_descendants_basic_failure__repeat_children():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        child = MockNodeNoChildren()
+
+        # test failure because of cycle
+        inter1._children[0] = inter2
+        inter2._children[0] = inter1
+        with pytest.raises(BaseNode.CycleDetectedError):
+            inter2.collect_descendants(traversal_mode='collect')
+
+        # test failure because child appears twice in two separate branches. 
+        inter1._children[0] = child
+        root._children[1] = inter1
+        root._children[0] = child
+
+        with pytest.raises(BaseNode.CycleDetectedError):
+            root.collect_descendants(traversal_mode='collect')
+
+    @staticmethod
+    def test_collect_descendants_with_update_success():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        child1 = MockNodeNoChildren()
+        child2 = MockNodeNoChildren()
+        
+        root._children[0] = child1
+        root._children[1] = inter1
+        inter1._children[0] = inter2
+        inter2._children[0] = child2
+
+        # verify actual collection still works
+        assert root.collect_descendants(traversal_mode='attach') == set([root, inter1, inter2, child1, child2])
+
+        # verify properties updated correctly
+        assert root._parent is None
+        assert root._depth == 0
+        assert child1._parent is root
+        assert child1._depth == root._depth + 1
+        assert inter1._parent is root
+        assert inter1._depth == root._depth + 1
+        assert inter2._parent is inter1
+        assert inter2._depth == inter1._depth + 1
+        assert child2._parent is inter2
+        assert child2._depth == inter2._depth + 1
+
+    @staticmethod
+    def test_collect_descendants_with_update_failure__changes_rolled_back():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        inter3 = MockNode1Child()
+        child1 = MockNodeNoChildren()
+        
+        root._children[0] = child1
+        root._children[1] = inter1
+        inter1._children[0] = inter2
+        inter2._children[0] = inter3
+
+        assert root.collect_descendants(traversal_mode='attach') == set([root, child1, inter1, inter2, inter3])
+
+        # before
+        assert root._parent is None
+        assert root._depth == 0
+        assert child1._parent is root
+        assert child1._depth == root._depth + 1
+        assert inter1._parent is root
+        assert inter1._depth == root._depth + 1
+        assert inter2._parent is inter1
+        assert inter2._depth == inter1._depth + 1
+
+        # create cycle
+        inter3._children[0] = inter1
+        try:
+            # should throw an error and rollback changes
+            inter3.collect_descendants(traversal_mode='attach')
+        except BaseNode.CycleDetectedError as e:
+            pass
+
+        # after (should be same as before)
+        assert root._parent is None
+        assert root._depth == 0
+        assert child1._parent is root
+        assert child1._depth == root._depth + 1
+        assert inter1._parent is root
+        assert inter1._depth == root._depth + 1
+        assert inter2._parent is inter1
+        assert inter2._depth == inter1._depth + 1
+
+    @staticmethod
+    def test_collect_descendants_pop_success():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        child1 = MockNodeNoChildren()
+        child2 = MockNodeNoChildren()
+        
+        root._children[0] = child1
+        root._children[1] = inter1
+        inter1._children[0] = inter2
+        inter2._children[0] = child2
+
+        root.collect_descendants(traversal_mode='attach')
+
+        inter1._children[0] = None
+        inter2._depth = 0
+        inter2._parent = None
+        assert inter2.collect_descendants(traversal_mode='detach') == set([inter2, child2])
+
+        assert inter2._depth == 0
+        assert inter2._parent is None
+        assert child2._depth == inter2._depth + 1
+        assert child2._parent is inter2
+
 
     # - - Test add_child - -
 
     @staticmethod
     def test_basic_add_child_success():
-        root = MockRootNode()
-        child = MockChildNode()
+        root = MockNode2Children()
+        child = MockNodeNoChildren()
 
         index = root.add_child(child, index=0)
         assert index == 0
@@ -334,8 +539,8 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_add_child_auto_index_success():
-        root = MockRootNode()
-        child = MockMiddleNode()
+        root = MockNode2Children()
+        child = MockNode1Child()
 
         # should automatically be added to first slot capable of taking MockChild1 nodes,
         # in this case, at index 1
@@ -345,10 +550,10 @@ class TestBaseNodeBehavior:
         assert all((root._children[i] is None) for i in range(len(root._children)) if i != index)
 
     @staticmethod
-    def test_add_child_recursive_properties():
-        root = MockRootNode()
-        inter = MockMiddleNode()
-        child = MockChildNode()
+    def test_add_child_recursively_sets_properties():
+        root = MockNode2Children()
+        inter = MockNode1Child()
+        child = MockNodeNoChildren()
 
         inter.add_child(child, index=0)
         root.add_child(inter)
@@ -358,40 +563,20 @@ class TestBaseNodeBehavior:
         assert child._depth == root._depth + 2
 
     @staticmethod
-    def test_add_child_failure_child_already_a_child():
-        root = MockRootNode()
-        child = MockChildNode()
+    def test_add_child_failure_child_already_in_node_child_list():
+        root = MockNode2Children()
+        child = MockNodeNoChildren()
 
         root.add_child(child)
 
         with pytest.raises(ValueError, match="new_child already in list of children"):
             root.add_child(child)
-
-    @staticmethod
-    def test_roll_back_success_after_add_child_failure():
-        root = MockRootNode()
-        inter1 = MockMiddleNode()
-        inter2 = MockMiddleNode()
-        inter3 = MockMiddleNode()
-        
-        inter2.add_child(inter3)
-        inter1.add_child(inter2)
-        root.add_child(inter1)
-
-        assert inter1._depth == root._depth + 1
-        try:
-            inter3.add_child(inter1)
-        except ValueError:
-            assert inter1 not in inter3.children
-            assert inter1._depth != inter3._depth + 1
-            assert inter1._depth == root._depth + 1
-            assert inter1._parent is root
             
     @staticmethod
     def test_add_child_failures_index_occupied():
-        root = MockRootNode()
-        child1 = MockMiddleNode()
-        child2 = MockChildNode()
+        root = MockNode2Children()
+        child1 = MockNode1Child()
+        child2 = MockNodeNoChildren()
 
         root.add_child(child2, 1)
 
@@ -405,9 +590,9 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_add_child_failures_invalid_type():
-        root = MockRootNode()
-        child1 = MockMiddleNode()
-        child2 = MockRootNode()
+        root = MockNode2Children()
+        child1 = MockNode1Child()
+        child2 = MockNode2Children()
 
         with pytest.raises(TypeError, match="new_child does not match possible child types"):
             root.add_child(child1, 0)         # MockChild1 only acceptable at index 1
@@ -417,30 +602,66 @@ class TestBaseNodeBehavior:
             root.add_child(child2)
 
     @staticmethod
-    def test_add_child_failures_repeat_node():
-        root = MockRootNode()
-        inter1 = MockMiddleNode()
-        inter2 = MockMiddleNode()
-        child = MockChildNode()
+    def test_add_child_failures_child_already_has_parent():
+        root1 = MockNode1Child()
+        root2 = MockNode1Child()
+        child = MockNodeNoChildren()
 
-        inter1.add_child(inter2)
-        with pytest.raises(ValueError, 
-                           match="Node could not be added because it will cause a cycle to form."):
-            inter2.add_child(inter1)
+        root1._children[0] = child
+        child._parent = root1
 
-        inter2.add_child(child)
-        root.add_child(child, index=0)
-        root.add_child(inter1, index=1)
+        with pytest.raises(ValueError,
+                           match="New child already has a parent."):
+            root2.add_child(child)
+
+    @staticmethod
+    def test_add_child_failures_node_causes_cycle():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+
+        # immediate cycle
+        root._children[0] = inter1
+        inter1._parent = root
+        with pytest.raises(ValueError,
+                           match='New child caused a cycle.'):
+            inter1.add_child(root)
+
+        # three layer cycle
+        inter1._children[0] = inter2
+        inter2._parent = inter1
+        with pytest.raises(ValueError,
+                           match='New child caused a cycle.'):
+            inter2.add_child(root)
+
+    @staticmethod
+    def test_roll_back_success_after_add_child_failure():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        inter3 = MockNode1Child()
         
+        inter2.add_child(inter3)
+        inter1.add_child(inter2)
+        root.add_child(inter1)
 
+        assert inter1._depth == root._depth + 1
+        try:
+            inter3.add_child(inter1)
+        except ValueError:
+            assert inter1 not in inter3.children
+            assert inter1._depth != inter3._depth + 1
+            assert inter1._depth == root._depth + 1
+            assert inter1._parent is root
+        
 
     # - - Other child functions- -
 
     @staticmethod
     def test_pop_children():
-        root = MockRootNode()
-        inter = MockMiddleNode()
-        child = MockChildNode()
+        root = MockNode2Children()
+        inter = MockNode1Child()
+        child = MockNodeNoChildren()
 
         inter.add_child(child, index=0)
         root.add_child(inter, index=1)
@@ -457,10 +678,10 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_remove_all_children():
-        root = MockRootNode()
+        root = MockNode2Children()
         
         for _ in range(2):
-            root.add_child(MockChildNode())
+            root.add_child(MockNodeNoChildren())
 
         children_cpy= root.children
 
@@ -474,8 +695,8 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_replace_child():
-        root = MockRootNode()
-        child = MockChildNode()
+        root = MockNode2Children()
+        child = MockNodeNoChildren()
 
         index = root.add_child(child)
 
@@ -484,7 +705,7 @@ class TestBaseNodeBehavior:
         assert old_child._depth != 0
 
         # test replacing a child with another node
-        new_child = MockChildNode()
+        new_child = MockNodeNoChildren()
         old_child = root.replace_child(index, new_child)
 
         assert root._children[index] is new_child
@@ -496,54 +717,13 @@ class TestBaseNodeBehavior:
 
     @staticmethod
     def test_get_index_of_child():
-        root = MockRootNode()
-        child = MockChildNode()
+        root = MockNode2Children()
+        child = MockNodeNoChildren()
         root.add_child(child, index=0)
         assert root.get_index_of_child(child) == 0
-        assert root.get_index_of_child(MockChildNode()) == -1
-
-
-    # - - Test Collect Descendants - - 
-
-    @staticmethod
-    def test_collect_descendants_success():
-        root = MockRootNode()
-        inter = MockMiddleNode()
-        c1 = MockChildNode()
-        c2 = MockChildNode()
-
-        inter.add_child(c2)
-        root.add_child(c1)
-        root.add_child(inter)
-
-        # test root get descendants
-        assert root.collect_descendants() == set([root, inter, c1, c2])
-        assert root.collect_descendants(include_self=False) == set([inter, c1, c2])
-
-        assert inter.collect_descendants() == set([inter, c2])
-
-    @staticmethod
-    def test_collect_descendants_failures_repeat_children():
-        root = MockRootNode()
-        inter1 = MockMiddleNode()
-        inter2 = MockMiddleNode()
-        child = MockChildNode()
-
-        # test failure because of cycle
-        inter1._children[0] = inter2
-        inter2._children[0] = inter1
-        with pytest.raises(ValueError, match="Error in recursively collecting descendants."):
-            inter2.collect_descendants(inter1)
-
-        # test failure because child appears twice in two separate branches. 
-        inter1._children[0] = child
-        root._children[1] = inter1
-        root._children[0] = child
-
-        with pytest.raises(ValueError, match="Error in recursively collecting descendants."):
-            root.collect_descendants(child)
+        assert root.get_index_of_child(MockNodeNoChildren()) == -1
         
 
 if __name__ == '__main__':
-    tests = TestBaseNodeBehavior()
-    tests.test_add_child_failures_repeat_node()
+    tests = TestBaseNodeChildManagement()
+    tests.test_roll_back_success_after_add_child_failure()
