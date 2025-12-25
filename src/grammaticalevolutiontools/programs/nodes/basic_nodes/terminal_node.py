@@ -1,4 +1,4 @@
-from ...program_node import ProgramNode
+from ...base.program_node import ProgramNode
 
 class TerminalNode(ProgramNode):
     def _base_node_init(self, token: str):

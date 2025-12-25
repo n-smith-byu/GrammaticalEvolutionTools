@@ -1,10 +1,8 @@
 from grammaticalevolutiontools.programs import ProgramTree
 from grammaticalevolutiontools.agents import Agent
 
-from ..utilities_ import BasicGrammar as bg
-from ..utilities_ import BasicWorld as bw
-
 import pytest
+import conftests as fx
 
 
 class TestBaseAgent:

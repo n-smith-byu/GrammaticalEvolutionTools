@@ -91,7 +91,3 @@ class ChildNode(ExecutableNode):
     def execute(self):
         print(ChildNode.PRINT_STR, end='')
 
-    
-
-
-    

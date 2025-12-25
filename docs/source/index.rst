@@ -19,7 +19,7 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
-   grammaticalevolutiontools/index
-   usage
+   getting_started
+   api/index
    examples
    

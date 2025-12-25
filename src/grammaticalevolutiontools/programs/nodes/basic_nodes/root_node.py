@@ -3,7 +3,7 @@ from .non_terminal_node import NonTerminalNode
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ...program_tree import ProgramTree
+    from ...base.program_tree import ProgramTree
 
 class RootNode(NonTerminalNode):    
 

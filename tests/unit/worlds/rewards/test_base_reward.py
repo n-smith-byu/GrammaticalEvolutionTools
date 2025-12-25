@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.worlds.rewards import Reward
+from grammaticalevolutiontools.worlds.base.objects.mixins.reward import RewardObjectMixin
 from ...utilities_ import BasicWorld as bw
 
 import pytest
@@ -12,7 +12,7 @@ class TestBaseReward:
 
     def test_base_reward_is_abstract(self):
         with pytest.raises(TypeError):
-            Reward(total_amount=10, base_yield=1)
+            RewardObjectMixin(total_amount=10, base_yield=1)
 
     def test_child_must_inherit_from_world_obj(self):
         with pytest.raises(TypeError):

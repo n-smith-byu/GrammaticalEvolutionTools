@@ -68,6 +68,7 @@ def pick_compatible_nodes_same_type_only(
 
 
 def pick_compatible_nodes_any_valid_replacement(program1: ProgramTree, program2: ProgramTree) -> Tuple[ProgramNode, ProgramNode]:
+    """Not Implemented"""
     picked = False
     incompatible_types = set([TerminalNode])
     possible_node1s = []
@@ -75,11 +76,11 @@ def pick_compatible_nodes_any_valid_replacement(program1: ProgramTree, program2:
         possible_node1s = [node for node in (possible_node1s or program1.node_iter()) \
                            if not isinstance(node, tuple(incompatible_types))]
         node1: ProgramNode = random.choice(possible_node1s)
+    
+    return NotImplemented
 
 
-
-
-def cross_over(program1: ProgramTree, program2: ProgramTree, 
+def cross_over_programs(program1: ProgramTree, program2: ProgramTree, 
                cross_over_option: CrossOverOption = 'same') -> list[ProgramTree]:
 
     # copy the nodes as to not modify the originals

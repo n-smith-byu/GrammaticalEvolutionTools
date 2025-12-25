@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.nodes import BaseNode
+from grammaticalevolutiontools.meta import BaseNode
 
 import numpy as np
 import pytest
@@ -14,6 +14,22 @@ class MockNode2Children(BaseNode):
             0: [MockNodeNoChildren],
             1: [MockNode1Child, MockNodeNoChildren]
         }
+
+        self._list = []
+
+    def _on_collect_descendants_attach(self):
+        self._list.append(1)
+        return super()._on_collect_descendants_attach()
+    
+    def _rollback_attach(self):
+        return self._on_collect_descendants_detach()
+    
+    def _on_collect_descendants_detach(self):
+        self._list.remove(1)
+        return super()._on_collect_descendants_detach()
+    
+    def _rollback_detach(self):
+        return self._on_collect_descendants_attach()
 
     @property
     def _possible_children_dict(self):
@@ -41,6 +57,25 @@ class MockNode2Children(BaseNode):
         return True
     
 class MockNode1Child(BaseNode):
+    def __init__(self):
+        super().__init__()
+
+        self._list = []
+
+    def _on_collect_descendants_attach(self):
+        self._list.append(1)
+        return super()._on_collect_descendants_attach()
+    
+    def _rollback_attach(self):
+        return self._on_collect_descendants_detach()
+    
+    def _on_collect_descendants_detach(self):
+        self._list.remove(1)
+        return super()._on_collect_descendants_detach()
+    
+    def _rollback_detach(self):
+        return self._on_collect_descendants_attach()
+
     @property
     def _possible_children_dict(self):
         return {0: [MockNodeNoChildren, MockNode1Child, MockNode2Children]}
@@ -67,6 +102,25 @@ class MockNode1Child(BaseNode):
         return False
 
 class MockNodeNoChildren(BaseNode):
+    def __init__(self):
+        super().__init__()
+
+        self._list = []
+
+    def _on_collect_descendants_attach(self):
+        self._list.append(1)
+        return super()._on_collect_descendants_attach()
+    
+    def _rollback_attach(self):
+        return self._on_collect_descendants_detach()
+    
+    def _on_collect_descendants_detach(self):
+        self._list.remove(1)
+        return super()._on_collect_descendants_detach()
+    
+    def _rollback_detach(self):
+        return self._on_collect_descendants_attach()
+
     @property
     def _possible_children_dict(self):
         return {}
@@ -81,16 +135,18 @@ class MockNodeNoChildren(BaseNode):
         return 0
     @property
     def label(self):
-        return "child2"
+        return "child"
     @property
     def token(self):
-        return "C2"
+        return "Moc"
     @property
     def is_terminal(self):
         return True
     @property
     def is_root(self):
         return False
+    
+
 
 
 # - - - - - - - - - - - -
@@ -102,44 +158,47 @@ class MockNodeNoChildren(BaseNode):
 
 
 # Basic Assertions
+class TestBasicStaticAssertions:
+    @staticmethod
+    def test_assert_token_valid():
+        BaseNode._assert_token_valid("abc")
+        with pytest.raises(ValueError):
+            BaseNode._assert_token_valid("")
+        with pytest.raises(TypeError):
+            BaseNode._assert_token_valid(123)
 
-def test_assert_token_valid():
-    BaseNode._assert_token_valid("abc")
-    with pytest.raises(ValueError):
-        BaseNode._assert_token_valid("")
-    with pytest.raises(TypeError):
-        BaseNode._assert_token_valid(123)
+    @staticmethod
+    def test_assert_max_num_children_valid():
+        BaseNode._assert_max_num_children_valid(3)
+        BaseNode._assert_max_num_children_valid(0)
+        BaseNode._assert_max_num_children_valid(0, is_terminal=True)
+        with pytest.raises(ValueError):
+            BaseNode._assert_max_num_children_valid(3, is_terminal=True)
+        with pytest.raises(ValueError):
+            BaseNode._assert_max_num_children_valid(-1)
+        with pytest.raises(TypeError):
+            BaseNode._assert_max_num_children_valid("3")
 
-def test_assert_max_num_children_valid():
-    BaseNode._assert_max_num_children_valid(3)
-    BaseNode._assert_max_num_children_valid(0)
-    BaseNode._assert_max_num_children_valid(0, is_terminal=True)
-    with pytest.raises(ValueError):
-        BaseNode._assert_max_num_children_valid(3, is_terminal=True)
-    with pytest.raises(ValueError):
-        BaseNode._assert_max_num_children_valid(-1)
-    with pytest.raises(TypeError):
-        BaseNode._assert_max_num_children_valid("3")
+    @staticmethod
+    def test_assert_label_valid():
+        BaseNode._assert_label_valid("label")
+        BaseNode._assert_label_valid("")
+        BaseNode._assert_label_valid(None)
+        with pytest.raises(TypeError):
+            BaseNode._assert_label_valid(5)
 
-def test_assert_label_valid():
-    BaseNode._assert_label_valid("label")
-    BaseNode._assert_label_valid("")
-    BaseNode._assert_label_valid(None)
-    with pytest.raises(TypeError):
-        BaseNode._assert_label_valid(5)
-
-def test_assert_tags_valid():
-    BaseNode._assert_tags_valid(is_terminal=False, is_root=True)
-    with pytest.raises(TypeError):
-        BaseNode._assert_tags_valid("yes", True)
-    with pytest.raises(TypeError):
-        BaseNode._assert_tags_valid(True, "yes")
-    with pytest.raises(ValueError):
-        BaseNode._assert_tags_valid(is_terminal=True, is_root=True)
+    @staticmethod
+    def test_assert_tags_valid():
+        BaseNode._assert_tags_valid(is_terminal=False, is_root=True)
+        with pytest.raises(TypeError):
+            BaseNode._assert_tags_valid("yes", True)
+        with pytest.raises(TypeError):
+            BaseNode._assert_tags_valid(True, "yes")
+        with pytest.raises(ValueError):
+            BaseNode._assert_tags_valid(is_terminal=True, is_root=True)
 
 
 # Complex Assertions
-
 class TestPossibleChildrenDictAssertions:
 
     """test assert_possible_children_dict_valid"""
@@ -242,28 +301,32 @@ class TestChildProbsValsAssertions:
 
 # ---- Probabilities and Static Utils Tests ----
 
-def test_probs_to_numpy():
-    arr = BaseNode.probs_to_numpy([0.2, 0.8])
-    assert isinstance(arr, np.ndarray)
-    assert arr.shape == (2,)
-    assert arr.dtype == np.float64
+class TestStaticUtils:
+    @staticmethod
+    def test_probs_to_numpy():
+        arr = BaseNode.probs_to_numpy([0.2, 0.8])
+        assert isinstance(arr, np.ndarray)
+        assert arr.shape == (2,)
+        assert arr.dtype == np.float64
 
-def test_convert_probs_dict_to_numpy():
-    probs_dict = {
-        0: [0.3, 0.7],
-        1: [0.5, 0.5]
-    }
-    converted = BaseNode.convert_probs_dict_to_numpy(probs_dict)
-    assert all(isinstance(v, np.ndarray) for v in converted.values())
-    assert all((key in converted) for key in probs_dict)
-    assert all(np.all(probs_dict[key] == converted[key]) for key in probs_dict)
+    @staticmethod
+    def test_convert_probs_dict_to_numpy():
+        probs_dict = {
+            0: [0.3, 0.7],
+            1: [0.5, 0.5]
+        }
+        converted = BaseNode.convert_probs_dict_to_numpy(probs_dict)
+        assert all(isinstance(v, np.ndarray) for v in converted.values())
+        assert all((key in converted) for key in probs_dict)
+        assert all(np.all(probs_dict[key] == converted[key]) for key in probs_dict)
 
-def test_get_possible_children_and_probs():
-    node = MockNode2Children()
-    children, probs = node.get_possible_children_and_probs(0)
-    assert isinstance(children, list)
-    assert isinstance(probs, np.ndarray)
-    assert np.isclose(probs.sum(), 1.0)
+    @staticmethod
+    def test_get_possible_children_and_probs():
+        node = MockNode2Children()
+        children, probs = node.get_possible_children_and_probs(0)
+        assert isinstance(children, list)
+        assert isinstance(probs, np.ndarray)
+        assert np.isclose(probs.sum(), 1.0)
 
 
 
@@ -425,7 +488,7 @@ class TestBaseNodeChildManagement:
             root.collect_descendants(traversal_mode='collect')
 
     @staticmethod
-    def test_collect_descendants_with_update_success():
+    def test_collect_descendants_attach_mode_success__children_updated_correctly():
         root = MockNode2Children()
         inter1 = MockNode1Child()
         inter2 = MockNode1Child()
@@ -453,7 +516,29 @@ class TestBaseNodeChildManagement:
         assert child2._depth == inter2._depth + 1
 
     @staticmethod
-    def test_collect_descendants_with_update_failure__changes_rolled_back():
+    def test_collect_descendants_attach_mode_success__hook_called_correctly():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        child1 = MockNodeNoChildren()
+        child2 = MockNodeNoChildren()
+        
+        root._children[0] = child1
+        root._children[1] = inter1
+        inter1._children[0] = inter2
+        inter2._children[0] = child2
+
+        # verify actual collection still works
+        assert root.collect_descendants(traversal_mode='attach') == set([root, inter1, inter2, child1, child2])
+        # verify hook called correctly
+        assert 1 in root._list
+        assert 1 in child1._list
+        assert 1 in inter1._list
+        assert 1 in inter2._list
+        assert 1 in child2._list
+
+    @staticmethod
+    def test_collect_descendants_attach_mode_failure__changes_rolled_back():
         root = MockNode2Children()
         inter1 = MockNode1Child()
         inter2 = MockNode1Child()
@@ -466,6 +551,7 @@ class TestBaseNodeChildManagement:
         inter2._children[0] = inter3
 
         assert root.collect_descendants(traversal_mode='attach') == set([root, child1, inter1, inter2, inter3])
+        # NOTE: 1 should be added to all lists
 
         # before
         assert root._parent is None
@@ -482,6 +568,7 @@ class TestBaseNodeChildManagement:
         try:
             # should throw an error and rollback changes
             inter3.collect_descendants(traversal_mode='attach')
+            # NOTE: Should attempt to add 1 to all lists, but should get rolled back
         except BaseNode.CycleDetectedError as e:
             pass
 
@@ -496,7 +583,39 @@ class TestBaseNodeChildManagement:
         assert inter2._depth == inter1._depth + 1
 
     @staticmethod
-    def test_collect_descendants_pop_success():
+    def test_collect_descendants_attach_mode_failure__hook_rolled_back_correctly():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        inter3 = MockNode1Child()
+        child1 = MockNodeNoChildren()
+        
+        root._children[0] = child1
+        root._children[1] = inter1
+        inter1._children[0] = inter2
+        inter2._children[0] = inter3
+
+        assert root.collect_descendants(traversal_mode='attach') == set([root, child1, inter1, inter2, inter3])
+        # NOTE: 1 should be added to all lists
+
+        # create cycle
+        inter3._children[0] = inter1
+        try:
+            # should throw an error and rollback changes
+            inter3.collect_descendants(traversal_mode='attach')
+            # NOTE: Should attempt to add 1 to all lists, but should get rolled back
+        except BaseNode.CycleDetectedError as e:
+            pass
+
+        # assert on_collect_descendants_attach() rolled back
+        assert root._list == [1]
+        assert child1._list == [1]
+        assert inter1._list == [1]
+        assert inter2._list == [1]
+        assert inter3._list == [1]
+
+    @staticmethod
+    def test_collect_descendants_detach_mode_success__children_updated_correctly():
         root = MockNode2Children()
         inter1 = MockNode1Child()
         inter2 = MockNode1Child()
@@ -520,6 +639,29 @@ class TestBaseNodeChildManagement:
         assert child2._depth == inter2._depth + 1
         assert child2._parent is inter2
 
+    @staticmethod
+    def test_collect_descendants_detach_mode_success__hook_called_correctly():
+        root = MockNode2Children()
+        inter1 = MockNode1Child()
+        inter2 = MockNode1Child()
+        child1 = MockNodeNoChildren()
+        child2 = MockNodeNoChildren()
+        
+        root._children[0] = child1
+        root._children[1] = inter1
+        inter1._children[0] = inter2
+        inter2._children[0] = child2
+
+        root.collect_descendants(traversal_mode='attach')
+
+        inter1._children[0] = None
+        inter2._depth = 0
+        inter2._parent = None
+        assert inter2.collect_descendants(traversal_mode='detach') == set([inter2, child2])
+
+        # verify on_collect_descendant_detach was called, removing 1 from _list
+        assert 1 not in inter2._list
+        assert 1 not in child2._list
 
     # - - Test add_child - -
 
@@ -563,7 +705,7 @@ class TestBaseNodeChildManagement:
         assert child._depth == root._depth + 2
 
     @staticmethod
-    def test_add_child_failure_child_already_in_node_child_list():
+    def test_add_child_failure__child_already_in_node_child_list():
         root = MockNode2Children()
         child = MockNodeNoChildren()
 
@@ -573,7 +715,7 @@ class TestBaseNodeChildManagement:
             root.add_child(child)
             
     @staticmethod
-    def test_add_child_failures_index_occupied():
+    def test_add_child_failure__index_occupied():
         root = MockNode2Children()
         child1 = MockNode1Child()
         child2 = MockNodeNoChildren()
@@ -589,7 +731,7 @@ class TestBaseNodeChildManagement:
             root.add_child(child1)            # MockNode1 only valid at index 1, which is occupied, so should fail to find a slot
 
     @staticmethod
-    def test_add_child_failures_invalid_type():
+    def test_add_child_failure__invalid_type():
         root = MockNode2Children()
         child1 = MockNode1Child()
         child2 = MockNode2Children()
@@ -602,7 +744,7 @@ class TestBaseNodeChildManagement:
             root.add_child(child2)
 
     @staticmethod
-    def test_add_child_failures_child_already_has_parent():
+    def test_add_child_failure__child_already_has_parent():
         root1 = MockNode1Child()
         root2 = MockNode1Child()
         child = MockNodeNoChildren()
@@ -615,7 +757,7 @@ class TestBaseNodeChildManagement:
             root2.add_child(child)
 
     @staticmethod
-    def test_add_child_failures_node_causes_cycle():
+    def test_add_child_failure__node_causes_cycle():
         root = MockNode2Children()
         inter1 = MockNode1Child()
         inter2 = MockNode1Child()
@@ -672,6 +814,7 @@ class TestBaseNodeChildManagement:
         assert root.num_children == 0
 
         assert inter._depth == 0
+        assert inter._parent is None
         assert child in inter._children
 
         assert child._depth == inter._depth + 1        
@@ -691,6 +834,7 @@ class TestBaseNodeChildManagement:
         assert all(c is None for c in root.children)
 
         assert all([(child._depth == 0) for child in children_cpy])
+        assert all([(child._parent is None) for child in children_cpy])
 
 
     @staticmethod
@@ -726,4 +870,4 @@ class TestBaseNodeChildManagement:
 
 if __name__ == '__main__':
     tests = TestBaseNodeChildManagement()
-    tests.test_roll_back_success_after_add_child_failure()
+    tests.test_collect_descendants_attach_mode_failure__hook_rolled_back_correctly()
