@@ -2,7 +2,7 @@ from .grid_position import GridPosition
 from .grid_world_agent import GridWorldAgent
 from .grid_layout import GridLayout
 from .grid_world_object import GridWorldObject
-from .._base.world import World
+from ..base.world import World
 from .grid_world_animation import GridWorldAnimation, Color
 
 from collections import defaultdict
@@ -18,12 +18,16 @@ class GridWorld[A: GridWorldAgent = GridWorldAgent,
     """
     An Class used to create Worlds for Grammatical Evolution Problems. 
 
+    A
+
     Attributes:
         width (int): A read-only property. The width of the world. 
         height (int): A read-only propery. The height of the world.
         amount (float): A read-only property. The amount of this reward.
-        pos (Position): A read-only property. The position of this reward in the world. 
-        __world (World): A private property. The world to which this reward belongs. 
+        pos (Position): A read-only property. The position of this 
+            reward in the world. 
+        __world (World): A private property. The world to which this 
+            reward belongs. 
     """
 
     type AgentMarker = Tuple[Type[A], 'GridPosition', GridWorldAgent.Direction]
@@ -37,7 +41,8 @@ class GridWorld[A: GridWorldAgent = GridWorldAgent,
     _layout_class = GridLayout
 
 
-    def __init__(self, layout: GridLayout, agents_can_share_spaces:bool=False):
+    def __init__(self, layout: GridLayout, agents_can_share_spaces:bool=False, 
+                 agents_wrap_around=False):
         """
             Initializes an instance of a World object.
 
@@ -59,6 +64,7 @@ class GridWorld[A: GridWorldAgent = GridWorldAgent,
         super(GridWorld, self).__init__(layout=layout)
 
         self._agents_can_share_spaces: bool = agents_can_share_spaces
+        self._agents_wrap_around = agents_wrap_around
 
         self._agent_positions: dict[GridPosition, set[A]] = defaultdict(set)
         self._object_positions: dict[GridPosition, list[O]] = defaultdict(list)

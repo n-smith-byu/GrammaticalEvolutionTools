@@ -1,4 +1,3 @@
-from ._base.layout import WorldLayout
-from ._base.world import World
+from .base import World, WorldLayout, WorldObject, WorldAnimation
 
-__all__ = ['WorldLayout', 'World']
+__all__ = ['World', 'WorldLayout', 'WorldObject', 'WorldAnimation']

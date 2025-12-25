@@ -4,19 +4,16 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath so that Sphinx finds it.
 
-import os
 import sys
 from pathlib import Path
 
-# Assuming your Python package 'my_package' is inside a 'src' directory
-# that is located one level up from your 'docs' folder,
-# and 'conf.py' is inside 'docs/source'.
-# This path points to 'my_awesome_project/src/'
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'src'))
+
+html_static_path = ['_static']
+
+def setup(app):
+    app.add_css_file('custom.css')
 
 
 # -- Project information -----------------------------------------------------
@@ -102,3 +99,8 @@ intersphinx_mapping = {
 todo_include_todos = True
 
 toc_object_entries = False
+
+rst_prolog = """
+.. role:: h2code(code)
+   :class: h2-code-style
+"""

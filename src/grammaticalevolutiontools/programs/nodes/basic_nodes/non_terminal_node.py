@@ -1,4 +1,4 @@
-from ...program_node import ProgramNode
+from ...base.program_node import ProgramNode
 from abc import abstractmethod
 from typing import Type
 

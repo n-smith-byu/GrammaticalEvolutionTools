@@ -1,4 +1,4 @@
-from .._base.layout import WorldLayout
+from ..base.layout import WorldLayout
 from .grid_world_object import GridWorldObject
 from .grid_position import GridPosition
 

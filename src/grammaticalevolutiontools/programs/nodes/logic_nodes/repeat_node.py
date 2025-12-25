@@ -1,4 +1,4 @@
-from .. import ProgramNode
+from ...base.program_node import ProgramNode
 from ..basic_nodes import NonTerminalNode
 from ..factor_nodes import IntegerNode
 

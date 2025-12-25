@@ -1,5 +1,5 @@
 from .grid_world_object import GridWorldObject
-from ...worlds.objects import Reward
+from ..base.objects import RewardObjectMixin
 
 from typing import TYPE_CHECKING
 
@@ -7,14 +7,14 @@ if TYPE_CHECKING:
     from .grid_world import GridWorld
     from .grid_world_agent import GridWorldAgent
 
-class GridWorldReward(Reward, GridWorldObject):
+class GridWorldReward(RewardObjectMixin, GridWorldObject):
 
     @classmethod
     def is_passable(self):
         return True
     
     def __init__(self, total_amount, yield_amount, world: 'GridWorld'):
-        Reward.__init__(self, total_amount, yield_amount)
+        RewardObjectMixin.__init__(self, total_amount, yield_amount)
         GridWorldObject.__init__(self, world)
 
     def trigger(self, agent: 'GridWorldAgent'):

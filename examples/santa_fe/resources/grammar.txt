@@ -1,0 +1,7 @@
+⟨code⟩ ::= ⟨progs⟩ 
+⟨progs⟩ ::= ⟨condition⟩ | ⟨prog2⟩ | ⟨prog3⟩ | ⟨op⟩ 
+⟨condition⟩ ::= if_food_ahead(⟨progs⟩,⟨progs⟩,⟨dist⟩)
+⟨prog2⟩ ::= prog2(⟨progs⟩,⟨progs⟩) 
+⟨prog3⟩ ::= prog3(⟨progs⟩,⟨progs⟩,⟨progs⟩) 
+⟨dist⟩ ::= 1 | 2 | 3
+⟨op⟩ ::= left | right | move

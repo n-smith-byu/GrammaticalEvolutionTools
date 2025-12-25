@@ -1,4 +1,4 @@
-from .._base.object import WorldObject
+from ..base.objects import WorldObject
 from .grid_position import GridPosition
 
 from abc import abstractmethod
