@@ -545,7 +545,7 @@ class ProgramNode(BaseNode):
             self._program._level_counts[self._depth] += 1
 
     def _on_collect_descendants_detach(self):
-        program: ProgramTree = self._attr_cache['_program']
+        program: ProgramTree = self._attr_cache.get('_program')
         if program and (self in program._nodes):
             original_depth = self._attr_cache['_depth']
 

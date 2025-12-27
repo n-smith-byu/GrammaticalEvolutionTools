@@ -1,4 +1,4 @@
-from ..base.layout import WorldPosition
+from ..base import WorldPosition
 
 from numbers import Integral
 

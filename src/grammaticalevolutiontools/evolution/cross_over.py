@@ -1,6 +1,5 @@
 from ..programs.nodes.basic_nodes import TerminalNode
-from ..programs.nodes import ProgramNode
-from ..programs import ProgramTree
+from ..programs import ProgramTree, ProgramNode
 import random
 
 from typing import Literal, Type, Tuple

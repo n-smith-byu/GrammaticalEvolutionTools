@@ -19,7 +19,6 @@
 * [Running Tests](#running-tests)
 * [Documentation](#documentation)
 * [License](#license)
-* [Contact](#contact)
 
 ---
 
@@ -29,7 +28,7 @@
 
 Whether you're building complex simulation environments or simple test cases, `grammaticalevolutiontools` streamlines the boilerplate, enabling faster iteration and more effective research in grammatical evolution.
 
-*NOTE: I am working on documentation and testing*
+*Note: This project is still in development. Code has been refactored and not all docstrings may reflect this yet.*
 
 ## Features
 

@@ -75,6 +75,11 @@ class ProgramTree:
     # - - Assertions - - 
 
     def _assert_root_valid(self):
+        if self._root is None:
+            raise ValueError(
+                "`root` cannot be None. Must be either an instance or " \
+                "subclass of RootNode"
+            )
         if not isinstance(self._root, RootNode):
             raise TypeError(
                 "Program root must be an instance of RootNode."
@@ -378,9 +383,9 @@ class ProgramTree:
             curr_node = self._program_stack[-1]
             if curr_node.num_children < curr_node.max_num_children:
                 raise ProgramTree.NodeMissingChildError(
-                    msg='Expected tree to be completely filled out, but'
-                        'encountered node with missing children.'
-                )
+                    "Expected tree to be completely filled out, but "
+                    "encountered node with missing children."
+                    )
             if isinstance(curr_node, ExecutableNode):
                 # run the node, then pop it off the stack
                 curr_node.execute()
@@ -390,7 +395,8 @@ class ProgramTree:
                 curr_node: 'NonTerminalNode'
                 next_child = curr_node.get_next_child()
                 if next_child is None:
-                    # if no more children nodes to run, pop the current node off the stack
+                    # if no more children nodes to run, pop the 
+                    # current node off the stack
                     self._program_stack.pop(-1)
                 else:
                     self._program_stack.append(next_child)

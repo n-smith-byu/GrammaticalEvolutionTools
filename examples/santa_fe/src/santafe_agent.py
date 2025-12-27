@@ -14,7 +14,7 @@ class SantaFeAgent(GridWorldAgent):
     @classmethod
     def default_grammar(cls):
         if not cls._default_grammar:
-            from .Grammar import SantaFeGrammar
+            from .grammar import SantaFeGrammar
             cls._default_grammar = SantaFeGrammar
 
         return cls._default_grammar
@@ -25,10 +25,6 @@ class SantaFeAgent(GridWorldAgent):
 
     def _set_world(self, world: 'SantaFeWorld'):
         return super()._set_world(world)
-
-    def give_reward(self, amount):
-        #print(f"<Reward: {self.position}, {amount}>")
-        return super().give_reward(amount)
 
     def food_within(self, distance):
         for k in range(1, distance + 1):
