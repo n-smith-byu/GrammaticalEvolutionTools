@@ -3,6 +3,9 @@
 [![Python Version](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/downloads/)
 [![Version](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/n-smith-byu/grammaticalevolutiontools)
 [![GitHub License](https://img.shields.io/badge/License-MIT-green)](https://github.com/n-smith-byu/GrammaticalEvolutionTools/blob/main/LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-under--construction-yellow)](https://img.shields.io/badge/docs-under--construction-yellow)
+![Tests](https://img.shields.io/badge/tests-under--construction-yellow)
+
 
 ---
 
@@ -34,8 +37,8 @@ Whether you're building complex simulation environments or simple test cases, `g
 
 * **World Environment Setup:** Easily define and configure custom environments for GE agents.
 * **Grammar Definition:** Inherit from common classes to create custom grammars with specific functionalities. 
-* **Agent Management:** 
-* **Problem Domain Abstraction:** Abstract away common GE problem complexities.
+* **Agent Management:** Logic for running Agent programs and having them interact with their world. 
+* **Evolution:** Common methods for cross over and mutation, built to work with program trees.
 * **Animation:** Create customizable animations for simulations. 
 
 ## Installation
@@ -118,7 +121,7 @@ Examples include an implementation of the Santa Fe problem and a basic grammatic
 
 ## Running Tests 
 
-*NOTE: In Progress*
+*NOTE: Incomplete*
 
 If you are developing the package, you can run the test suite using `pytest`. Ensure you have installed the `dev` dependencies.
 
@@ -131,7 +134,7 @@ pytest
 
 ## Documentation
 
-*NOTE: In Progress*
+*NOTE: Incomplete*
 
 The project's documentation is built using Sphinx. To generate the HTML documentation locally, ensure you have installed the `dev` dependencies.
 
