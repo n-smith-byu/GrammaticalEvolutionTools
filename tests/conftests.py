@@ -1,5 +1,5 @@
-from grammaticalevolutiontools.worlds.layouts import WorldLayout
-from grammaticalevolutiontools.worlds.objects import WorldObject
+from grammaticalevolutiontools.worlds.base import WorldLayout
+from grammaticalevolutiontools.worlds.base import WorldObject
 from grammaticalevolutiontools.worlds import World
 from grammaticalevolutiontools.agents import Agent
 
