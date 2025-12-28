@@ -115,7 +115,7 @@ To run these examples, make sure you have installed the package with the `exampl
 cd examples/
 jupyter lab # or jupyter notebook
 ```
-Examples include an implementation of the Santa Fe problem and a basic grammatical evolution algorthm. 
+Examples include an implementation of the Santa Fe problem and a basic grammatical evolution algorithm. 
 
 ---
 
