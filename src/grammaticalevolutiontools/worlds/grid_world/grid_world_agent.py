@@ -154,9 +154,9 @@ class GridWorldAgent(Agent):
             new_pos = self._world.wrap_position(new_pos)
         
         if self._world.space_valid_and_open(new_pos):
-                if ignore_other_agents or not self._world.position_occupied(new_pos):
-                    self._pos = new_pos
-                    self._on_changed_pos(_old_pos)
+            if ignore_other_agents or not self._world.position_occupied(new_pos):
+                self._pos = new_pos
+                self._on_changed_pos(_old_pos)
 
         self._on_action_taken()
             
