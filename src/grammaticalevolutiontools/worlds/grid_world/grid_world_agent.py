@@ -1,4 +1,4 @@
-from ...agents import Agent, AgentProgramTree
+from ...agents import Agent, SyncAgentProgramTree
 from .grid_world_object import GridWorldObject
 from .grid_position import GridPosition
 
@@ -65,7 +65,7 @@ class GridWorldAgent(Agent):
     # - - Instance Definition - - #
     ###############################
 
-    def __init__(self, program: AgentProgramTree = None, autogen=True):
+    def __init__(self, program: SyncAgentProgramTree = None, autogen=True):
         super(GridWorldAgent, self).__init__(program, autogen)
 
         self._world: 'GridWorld'

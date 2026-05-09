@@ -1,4 +1,4 @@
-from ...base.program_node import ProgramNode
+from ..sync_node import SyncProgramNode
 from ..basic_nodes import NonTerminalNode
 from ..factor_nodes import FactorNode
 
@@ -15,8 +15,8 @@ class ConditionNode(NonTerminalNode):
 
     def _base_node_init(
             self, token: str, label: str, 
-            possible_children_true: list[Type[ProgramNode]], 
-            possible_children_false: list[Type[ProgramNode]], 
+            possible_children_true: list[Type[SyncProgramNode]], 
+            possible_children_false: list[Type[SyncProgramNode]], 
             t_child_probs: Optional[Probabilities] = None, 
             f_child_probs: Optional[Probabilities] = None,
             factor_possible_vals: Optional[FactorList] = None
@@ -92,10 +92,10 @@ class ConditionNode(NonTerminalNode):
         return _str + ")"
     
     @property
-    def _true_child(self) -> ProgramNode:
+    def _true_child(self) -> SyncProgramNode:
         return self._children[ConditionNode.TRUE_IND]
     
     @property
-    def _false_child(self) -> ProgramNode:
+    def _false_child(self) -> SyncProgramNode:
         return self._children[ConditionNode.FALSE_IND]
 

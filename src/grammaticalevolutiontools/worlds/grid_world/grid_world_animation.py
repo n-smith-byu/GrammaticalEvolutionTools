@@ -1,5 +1,5 @@
 from .grid_world_agent import GridWorldAgent
-from ...meta import WorldAnimation
+from ..base import WorldAnimation
 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation

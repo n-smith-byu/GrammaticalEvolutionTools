@@ -1,4 +1,4 @@
-from ...base.program_node import ProgramNode
+from ..sync_node import SyncProgramNode
 from ..basic_nodes import NonTerminalNode
 from ..factor_nodes import IntegerNode
 
@@ -6,7 +6,7 @@ class RepeatNode(NonTerminalNode):
     def _base_node_init(
             self, 
             possible_numbers:list[IntegerNode], 
-            possible_child_types:list[ProgramNode],
+            possible_child_types:list[SyncProgramNode],
             label: str = 'repeat'):
         
         super()._base_node_init(
@@ -25,7 +25,9 @@ class RepeatNode(NonTerminalNode):
     def num_repeats(self):
         number = self.children[0]
         if number is None:
-            raise RuntimeError('This node does not have its number of repeats defined. Please add a NumberNode containing the number of repeats to child index 0.')
+            raise RuntimeError("This node does not have its number of repeats defined. "
+                               "Please add a NumberNode containing the number of repeats "
+                               "to child index 0.")
         
         return number()
     

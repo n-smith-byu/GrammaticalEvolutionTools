@@ -1,4 +1,4 @@
-from ..programs.base.program_tree import ProgramTree
+from ..programs import SyncProgramTree
 from ..programs.mods.grammar import GrammarProgramAddin
 
 from typing import TYPE_CHECKING
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from ..agents import Agent
 
 
-class AgentProgramTree(ProgramTree, GrammarProgramAddin):
+class SyncAgentProgramTree(SyncProgramTree, GrammarProgramAddin):
     
     @classmethod
     def _assert_agent_valid(cls, agent):
@@ -32,28 +32,25 @@ class AgentProgramTree(ProgramTree, GrammarProgramAddin):
         
     def _assert_editable(self):
         if self.bound_to_agent():
-            raise AgentProgramTree.BoundToAgentError(
+            raise SyncAgentProgramTree.BoundToAgentError(
                 "Cannot modify a program while it is bound to an agent. "
                 "Please remove the program from the agent first or create "
                 "a copy to modify. "
             )
-        ProgramTree._assert_editable(self)
+        SyncProgramTree._assert_editable(self)
         
     def _assert_runnable(self):
         if not self.bound_to_agent():
-            raise AgentProgramTree.MissingAgentError(
+            raise SyncAgentProgramTree.MissingAgentError(
                 "Cannot run program when it is not bound to an agent."
             )
-        ProgramTree._assert_runnable(self)
+        SyncProgramTree._assert_runnable(self)
 
     # - - Initialization - - 
 
     def __init__(self, root=None, autofill=True):
         self._agent = None
-        ProgramTree.__init__(self, root, autofill=autofill)
-        
-    def _verify_and_set_root(self, root):
-        GrammarProgramAddin._verify_and_set_root(self, root)
+        SyncProgramTree.__init__(self, root, autofill=autofill)
 
     # - - Agent Access - - 
     
@@ -85,12 +82,15 @@ class AgentProgramTree(ProgramTree, GrammarProgramAddin):
         return self._agent is not None
         
     def is_editable(self):
-        return ProgramTree.is_editable(self) and \
+        return SyncProgramTree.is_editable(self) and \
                 not self.bound_to_agent()
     
     def is_runnable(self):
-        return ProgramTree.is_runnable() and \
+        return SyncProgramTree.is_runnable() and \
                 self.bound_to_agent()
+    
+    def _verify_and_set_root(self, root):
+        GrammarProgramAddin._verify_and_set_root(self, root)
     
     @property
     def agent(self) -> 'Agent':

@@ -1,14 +1,14 @@
 from .non_terminal_node import NonTerminalNode
 
-from typing import TYPE_CHECKING
+from typing import Type, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ...base.program_tree import ProgramTree
+    from ..sync_node import SyncProgramNode
 
 class RootNode(NonTerminalNode):    
 
     def _base_node_init(self, token: str, 
-                        possible_children: list[type],
+                        possible_children: list[Type['SyncProgramNode']],
                         child_probs: list[float] = None, 
                         label: str = None):
         

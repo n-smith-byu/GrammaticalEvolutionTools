@@ -1,4 +1,4 @@
-from .agent_program import AgentProgramTree
+from .agent_program import SyncAgentProgramTree
 from ..grammars import Grammar
 
 from numbers import Number
@@ -17,13 +17,13 @@ class Agent:
         return cls._default_grammar
     
     @classmethod
-    def default_program_cls(cls) -> Type[AgentProgramTree]:
+    def default_program_cls(cls) -> Type[SyncAgentProgramTree]:
         mangled = f"_{cls.__name__}__default_program_cls"
         
         if not hasattr(cls, mangled):
             default_grammar = cls.default_grammar()
             if default_grammar:
-                class AgentProgram(AgentProgramTree):
+                class AgentProgram(SyncAgentProgramTree):
                     _grammar = default_grammar
                     pass
                 setattr(cls, mangled, AgentProgram)
@@ -49,9 +49,9 @@ class Agent:
 
     # - - Initialization - -
 
-    def __init__(self, program: AgentProgramTree = None, autogen=True):
+    def __init__(self, program: SyncAgentProgramTree = None, autogen=True):
         self._world: World = None
-        self._program: AgentProgramTree = None
+        self._program: SyncAgentProgramTree = None
         self._uuid = uuid4()       # just to make hashable
 
         self._score = 0
@@ -89,7 +89,7 @@ class Agent:
             )
         
     def _assert_valid_program(self, program):
-        if not isinstance(program, AgentProgramTree):
+        if not isinstance(program, SyncAgentProgramTree):
             raise TypeError('program must be an instance of AgentProgramTree.')
         if program.agent and program.agent is not self:
             raise ValueError(
@@ -109,19 +109,19 @@ class Agent:
 
     # - - Helpers - - 
 
-    def _set_program(self, program: AgentProgramTree):
+    def _set_program(self, program: SyncAgentProgramTree):
         self._program = program
         if program: 
             program._set_agent(self)
 
-    def _remove_program(self) -> AgentProgramTree:
+    def _remove_program(self) -> SyncAgentProgramTree:
         program = self._program
         program._set_agent(None)
         self._program = None
         
         return program
     
-    def _replace_program(self, new_program: AgentProgramTree) -> AgentProgramTree:
+    def _replace_program(self, new_program: SyncAgentProgramTree) -> SyncAgentProgramTree:
         old = self._remove_program()
         try:
             self._set_program(new_program)
@@ -133,7 +133,7 @@ class Agent:
     
     # - - Public - - 
 
-    def reset(self, program: AgentProgramTree = None):
+    def reset(self, program: SyncAgentProgramTree = None):
         if program:
             self._assert_valid_program(program)
             self._replace_program(program)
@@ -167,7 +167,7 @@ class Agent:
             raise Agent.WorldNotSetError("Cannot run program without agent being assigned a world unless this is a worldless agent.")
 
         status = self._program.tick()
-        if status == AgentProgramTree.Status.EXITED and loop:
+        if status == SyncAgentProgramTree.Status.EXITED and loop:
             self._program.tick()
 
     def give_reward(self, amount):
@@ -189,7 +189,7 @@ class Agent:
         return self._world is not None
     
     @property
-    def program(self) -> AgentProgramTree:
+    def program(self) -> SyncAgentProgramTree:
         return self._program
     
     @property

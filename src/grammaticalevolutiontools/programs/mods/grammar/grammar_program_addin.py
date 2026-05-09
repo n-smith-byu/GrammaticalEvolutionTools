@@ -1,6 +1,7 @@
 from ....grammars import Grammar
+from abc import ABCMeta
 
-class GrammarProgramMeta(type):
+class GrammarProgramMeta(ABCMeta):
     def __call__(cls, *args, **kwds):
         if issubclass(cls, GrammarProgramAddin):
             if cls._grammar is NotImplemented:

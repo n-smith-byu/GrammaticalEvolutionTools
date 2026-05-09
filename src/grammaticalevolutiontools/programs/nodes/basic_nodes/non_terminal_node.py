@@ -1,16 +1,16 @@
-from ...base.program_node import ProgramNode
+from ..sync_node import SyncProgramNode
 from abc import abstractmethod
 from typing import Type
 
 
-class NonTerminalNode(ProgramNode):
+class NonTerminalNode(SyncProgramNode):
     """
     Abstract class
     """
 
     def _base_node_init(self, token: str, 
                         is_root: bool, num_children: int, 
-                        possible_children: dict[int, list[Type[ProgramNode]]],
+                        possible_children: dict[int, list[Type[SyncProgramNode]]],
                         child_probs: dict[int, list[float]] = None,
                         label: str = None):
         
@@ -29,7 +29,7 @@ class NonTerminalNode(ProgramNode):
         return super()._custom_init() 
     
     def _assert_editable(self):
-        ProgramNode._assert_editable(self)
+        SyncProgramNode._assert_editable(self)
 
         if self.is_running():
             raise RuntimeError(
@@ -45,10 +45,10 @@ class NonTerminalNode(ProgramNode):
     def remove_all_children(self):
         # if node not attached to program or program not running, 
         # then resets node and removes all children
-        ProgramNode._assert_editable(self)
+        SyncProgramNode._assert_editable(self)
         self.reset()
         
-        return ProgramNode.remove_all_children(self)
+        return SyncProgramNode.remove_all_children(self)
         
     def is_running(self):
         return self._curr_child > -1

@@ -1,6 +1,6 @@
-from .meta import BaseNode, BaseNodeMeta, InheritingNodeMeta, WorldAnimation
-from .worlds.base import World
-from .agents import Agent, AgentProgramTree
+from .meta import BaseNode, BaseNodeMeta, InheritingNodeMeta
+from .worlds.base import World, WorldAnimation
+from .agents import Agent, SyncAgentProgramTree
 
 
 __all__ = []

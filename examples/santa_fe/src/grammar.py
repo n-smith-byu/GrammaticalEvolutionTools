@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from grammaticalevolutiontools.agents import AgentProgramTree
+    from grammaticalevolutiontools.agents import SyncAgentProgramTree
 
 _MIN_SIGHT_RANGE = 1
 _MAX_SIGHT_RANGE = 1
@@ -110,7 +110,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             )
         
         def condition(self) -> bool:
-            self._program: AgentProgramTree
+            self._program: SyncAgentProgramTree
             agent: SantaFeAgent = self._program.agent
             num_spaces: int = self._get_factor('dist').value
 
@@ -152,7 +152,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
-            self._program: AgentProgramTree
+            self._program: SyncAgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.turn_left()
         
@@ -165,7 +165,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
-            self._program: AgentProgramTree
+            self._program: SyncAgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.turn_right()
 
@@ -178,7 +178,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
-            self._program: AgentProgramTree
+            self._program: SyncAgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.turn_around()
         
@@ -191,7 +191,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
             return super()._custom_init()
 
         def execute(self):
-            self._program: AgentProgramTree
+            self._program: SyncAgentProgramTree
             agent: SantaFeAgent = self._program.agent
             agent.move_forward()
 

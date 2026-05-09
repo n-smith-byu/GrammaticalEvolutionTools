@@ -1,6 +1,6 @@
-from ...base.program_node import ProgramNode
+from ..sync_node import SyncProgramNode
 
-class TerminalNode(ProgramNode):
+class TerminalNode(SyncProgramNode):
     def _base_node_init(self, token: str):
         super()._base_node_init(
             token,

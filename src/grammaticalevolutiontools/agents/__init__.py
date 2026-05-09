@@ -1,4 +1,4 @@
 from .agent import Agent
-from .agent_program import AgentProgramTree
+from .agent_program import SyncAgentProgramTree
 
-__all__ = ['Agent', 'AgentProgramTree']
+__all__ = ['Agent', 'SyncAgentProgramTree']
