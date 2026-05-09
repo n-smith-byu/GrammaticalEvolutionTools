@@ -77,10 +77,10 @@ git clone [https://github.com/n-smith-byu/grammaticalevolutiontools.git](https:/
 cd grammaticalevolutiontools
 
 # Install the core package in editable mode
-poetry install --no-root --only main
+poetry install
 ```
 
-### For Notebooks and Examples
+### To Run the Notebooks and Examples
 
 If you plan to explore the provided examples or run the Jupyter notebooks, you'll need to install the package with the `examples` dependency group.
 
