@@ -3,8 +3,8 @@ from grammaticalevolutiontools.worlds.base import WorldObject
 from grammaticalevolutiontools.worlds import World
 from grammaticalevolutiontools.agents import Agent
 
-from grammaticalevolutiontools.programs.nodes.basic_nodes import ExecutableNode, RootNode
-from grammaticalevolutiontools.programs.nodes.logic_nodes import SequentialNode
+from grammaticalevolutiontools.programs.nodes.synchronous.basic_nodes import ExecutableNode, RootNode
+from grammaticalevolutiontools.programs.nodes.synchronous.logic_nodes import SequentialNode
 from grammaticalevolutiontools.grammars import Grammar
 
 

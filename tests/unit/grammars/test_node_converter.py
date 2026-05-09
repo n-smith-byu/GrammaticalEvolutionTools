@@ -1,9 +1,9 @@
 from grammaticalevolutiontools.programs.nodes import ProgramNode
-from grammaticalevolutiontools.programs.nodes.basic_nodes import \
+from grammaticalevolutiontools.programs.nodes.synchronous.basic_nodes import \
     RootNode
-from grammaticalevolutiontools.programs.nodes.logic_nodes import \
+from grammaticalevolutiontools.programs.nodes.synchronous.logic_nodes import \
     SequentialNode, ConditionNode
-from grammaticalevolutiontools.programs.nodes.factor_nodes import \
+from grammaticalevolutiontools.programs.nodes.synchronous.factor_nodes import \
     RandIntegerNode, IntegerNode
 from grammaticalevolutiontools.grammars import Grammar, \
     GrammarNode, as_grammar_node

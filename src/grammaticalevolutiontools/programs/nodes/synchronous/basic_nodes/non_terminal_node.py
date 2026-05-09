@@ -32,9 +32,10 @@ class NonTerminalNode(SyncProgramNode):
         SyncProgramNode._assert_editable(self)
 
         if self.is_running():
-            raise RuntimeError(
+            from ....base import ProgramTree
+            raise ProgramTree.ProgramInProgressError(
                 'Cannot modify children while this node is still running. '
-                'Please reset th node first.'
+                'Please reset the node first.'
             )
 
     def reset(self):
@@ -45,7 +46,7 @@ class NonTerminalNode(SyncProgramNode):
     def remove_all_children(self):
         # if node not attached to program or program not running, 
         # then resets node and removes all children
-        SyncProgramNode._assert_editable(self)
+        self._assert_editable()
         self.reset()
         
         return SyncProgramNode.remove_all_children(self)

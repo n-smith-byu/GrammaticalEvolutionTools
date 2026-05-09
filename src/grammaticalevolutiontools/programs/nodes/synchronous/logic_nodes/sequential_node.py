@@ -1,4 +1,4 @@
-from ...base.program_node import ProgramNode
+from ....base.program_node import ProgramNode
 from ..basic_nodes import NonTerminalNode
 from typing import Union, Type
 

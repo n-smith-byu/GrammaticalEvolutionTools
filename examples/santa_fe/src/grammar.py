@@ -1,7 +1,8 @@
-from grammaticalevolutiontools.programs.nodes import \
-    basic_nodes, logic_nodes, factor_nodes
+from grammaticalevolutiontools.programs.nodes.synchronous import \
+    basic_nodes
 from grammaticalevolutiontools.grammars import \
     Grammar, as_grammar_node
+from grammaticalevolutiontools.programs.nodes.synchronous import factor_nodes, logic_nodes
 
 from .santafe_agent import SantaFeAgent
 

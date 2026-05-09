@@ -434,7 +434,7 @@ class ProgramNode(BaseNode):
 
         super(ProgramNode, self).__init__()
 
-    def _custom_init(self):
+    def _custom_init(self, _async: bool=False):
         """Performs custom, `ProgramNode`-specific initialization.
 
         This method is called by :py:meth:`~.ProgramNode.__init__` after
@@ -475,6 +475,7 @@ class ProgramNode(BaseNode):
         """
         self._program: 'ProgramTree' = None
         self._parent: ProgramNode
+        self._async: bool = _async
 
 
     # - - Public Methods - -
@@ -642,3 +643,11 @@ class ProgramNode(BaseNode):
         This property reflects the `_is_root` attribute set during initialization.
         """
         return self._is_root
+    
+    @property
+    def is_asynchronous(self) -> bool:
+        return self._async
+    
+    @property
+    def is_synchronous(self) -> bool:
+        return not self._async

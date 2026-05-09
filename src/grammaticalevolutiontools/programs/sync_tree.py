@@ -1,5 +1,5 @@
-from .nodes.basic_nodes import NonTerminalNode, RootNode, ExecutableNode
-from .nodes.sync_node import SyncProgramNode
+from .nodes.synchronous.basic_nodes import NonTerminalNode, RootNode, ExecutableNode
+from .nodes.synchronous.sync_node import SyncProgramNode
 from .base import ProgramTree
 
 from enum import IntEnum
@@ -61,10 +61,10 @@ class SyncProgramTree(ProgramTree):
 
     class Status(IntEnum):
         """An enumeration representing the execution status of a program."""
-        EXITED = 0
-        """The program has finished execution."""
-        RUNNING = 1
+        RUNNING = 0
         """The program is currently executing."""
+        EXITED = 1
+        """The program has finished execution."""
 
     # - - Assertions - - 
 
@@ -209,7 +209,7 @@ class SyncProgramTree(ProgramTree):
         """
         for _ in range(n):    
             # run the program through to completion n times
-            while self.tick():
+            while self.tick() == SyncProgramTree.Status.RUNNING:
                 pass
 
     def kill(self):

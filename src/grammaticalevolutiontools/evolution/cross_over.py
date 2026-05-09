@@ -1,4 +1,4 @@
-from ..programs.nodes.basic_nodes import TerminalNode
+from ..programs.nodes.synchronous.basic_nodes import TerminalNode
 from ..programs import ProgramTree, ProgramNode
 import random
 
