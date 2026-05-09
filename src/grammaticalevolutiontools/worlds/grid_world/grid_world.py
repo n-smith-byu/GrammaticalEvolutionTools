@@ -135,6 +135,13 @@ class GridWorld[A: GridWorldAgent = GridWorldAgent,
         _agents = self.get_agents_at_position(pos)
         return len(_agents) > 0
     
+    def wrap_position(self, pos: GridPosition) -> GridPosition:
+        _pos = GridPosition(pos)
+        wrapped_coords = _pos.coords.copy()
+        wrapped_coords[0] = wrapped_coords[0] % self.height
+        wrapped_coords[1] = wrapped_coords[1] % self.width
+        return GridPosition(wrapped_coords)
+    
     def space_valid_and_open(self, pos: GridPosition) -> bool:
         cond1 = self.space_within_map_bounds(pos) and self.position_passable(pos)
         if self._agents_can_share_spaces:
