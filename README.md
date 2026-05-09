@@ -80,7 +80,7 @@ cd grammaticalevolutiontools
 poetry install
 ```
 
-### To Run the Notebooks and Examples
+### To Run Notebooks and Examples
 
 If you plan to explore the provided examples or run the Jupyter notebooks, you'll need to install the package with the `examples` dependency group.
 
@@ -112,7 +112,7 @@ poetry install --with dev
 
 The `examples/` directory in this repository contains various Jupyter notebooks and scripts demonstrating how to use `grammaticalevolutiontools` for different scenarios.
 
-To run these examples, make sure you have installed the package with the `examples` group:
+To run these examples, make sure you have installed the package with the `examples` dependency group:
 
 ```bash
 # Ensure you are in the project root directory
