@@ -27,7 +27,7 @@
 
 ## Introduction
 
-`grammaticalevolutiontools` is a Python package designed to simplify the setup and execution of Grammatical Evolution (GE) projects. It provides a suite of tools for quickly spinning up worlds, defining grammars, setting up agents, and running and animating simulations. It includes a number of abstract classes you can easily inherit from and customize, with much of the underlying functionality already implemented.
+`grammaticalevolutiontools` is a Python package designed to simplify the setup and execution of Grammatical Evolution (GE) and other Agent-Based Modeling (ABM) projects. It provides a suite of tools for quickly spinning up worlds, defining grammars, setting up agents, and running and animating simulations. It includes a number of abstract classes you can easily inherit from and customize, with much of the underlying functionality already implemented.
 
 Whether you're building complex simulation environments or simple test cases, `grammaticalevolutiontools` streamlines the boilerplate, enabling faster iteration and more effective research in grammatical evolution.
 
@@ -35,11 +35,15 @@ Whether you're building complex simulation environments or simple test cases, `g
 
 ## Features
 
+### Currently Available:
 * **World Environment Setup:** Easily define and configure custom environments for GE agents.
 * **Grammar Definition:** Inherit from common classes to create custom grammars with specific functionalities. 
 * **Agent Management:** Logic for running Agent programs and having them interact with their world. 
 * **Evolution:** Common methods for cross over and mutation, built to work with program trees.
-* **Animation:** Create customizable animations for simulations. 
+* **Animation:** Create customizable animations for simulations.
+
+### Coming Soon: 
+* Asynchronous Behavior Trees!
 
 ## Installation
 
