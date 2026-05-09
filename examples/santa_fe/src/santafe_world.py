@@ -28,7 +28,7 @@ class SantaFeWorld(GridWorld[SantaFeAgent, SantaFeLayout]):
 
     def __init__(self, agent: 'SantaFeAgent'=None):
         
-        super(SantaFeWorld, self).__init__(SantaFeWorld._layout)
+        super(SantaFeWorld, self).__init__(SantaFeWorld._layout, agents_wrap_around=True)
 
         self._agent_start_pos = GridPosition((0,0))
 
