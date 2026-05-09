@@ -17,6 +17,9 @@ seaborn = ">=0.13.2,<0.14.0"
 ipykernel = "^7.0.1"
 scipy = "^1.16.2"
 
+[tool.poetry.group.dev]
+optional = true
+
 [tool.poetry.group.dev.dependencies]
 sphinx-rtd-theme = "^3.0.2"
 numpydoc = "^1.9.0"
