@@ -1,7 +1,7 @@
 # Grammatical Evolution Tools
 
 [![Python Version](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/n-smith-byu/grammaticalevolutiontools)
+[![Version](https://img.shields.io/badge/Version-1.1.0-blue)](https://github.com/n-smith-byu/grammaticalevolutiontools)
 [![GitHub License](https://img.shields.io/badge/License-MIT-green)](https://github.com/n-smith-byu/GrammaticalEvolutionTools/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-under--construction-yellow)](https://img.shields.io/badge/docs-under--construction-yellow)
 ![Tests](https://img.shields.io/badge/tests-under--construction-yellow)
