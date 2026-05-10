@@ -38,7 +38,7 @@ class SequentialNode(NonTerminalNode):
 
         super()._base_node_init(token=token, is_root=False,
                                 num_children=num_children, 
-                                possible_children=_possible_children,
+                                possible_children_dict=_possible_children,
                                 label=label)
 
     def get_next_child(self):

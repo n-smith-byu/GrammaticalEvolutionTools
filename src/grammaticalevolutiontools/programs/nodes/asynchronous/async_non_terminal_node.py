@@ -1,22 +1,27 @@
 from .async_node import AsyncProgramNode
 
+from typing import Type
+
 class AsyncNonTerminalNode(AsyncProgramNode):
 
-    def _base_node_init(self, token, is_root, 
-                        num_children,
-                        possible_children_dict,
-                        special_child_probs):
+    def _base_node_init(self, token: str, 
+                        is_root: bool, num_children: int, 
+                        possible_children_dict: dict[int, list[Type[AsyncProgramNode]]],
+                        child_probs: dict[int, list[float]] = None,
+                        label: str = None):
         super()._base_node_init(
             token=token, 
             is_terminal=False,
             is_root=is_root,
             num_children=num_children,
             possible_children_dict=possible_children_dict,
-            special_child_probs=special_child_probs
+            special_child_probs=child_probs,
+            label=label
             )
         
     def _custom_init(self):
-        super()._custom_init()
+        self._curr_child: int = -1
+        return super()._custom_init()
 
     def _assert_editable(self):
         AsyncProgramNode._assert_editable(self)
@@ -29,7 +34,7 @@ class AsyncNonTerminalNode(AsyncProgramNode):
             )
         
     def reset(self):
-        self._curr_child = -1
+        self._curr_child = 0
         self._status = AsyncProgramNode.Status.RESET
         for child in self.children:
             child.reset()
@@ -41,9 +46,6 @@ class AsyncNonTerminalNode(AsyncProgramNode):
         self.reset()
         
         return self.remove_all_children()
-        
-    def is_running(self):
-        return self._status == AsyncProgramNode.Status.RUNNING
     
     # - - - -
     

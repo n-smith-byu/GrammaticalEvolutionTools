@@ -1,6 +1,6 @@
-from ..sync_node import SyncProgramNode
+from .async_node import AsyncProgramNode
 
-class TerminalNode(SyncProgramNode):
+class AsyncTerminalNode(AsyncProgramNode):
     def _base_node_init(self, token: str):
         super()._base_node_init(
             token=token,
@@ -9,6 +9,3 @@ class TerminalNode(SyncProgramNode):
             num_children=0,
             possible_children_dict=None
         )
-
-    def _custom_init(self):
-        return super()._custom_init()

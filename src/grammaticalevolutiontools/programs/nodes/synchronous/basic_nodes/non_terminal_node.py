@@ -10,7 +10,7 @@ class NonTerminalNode(SyncProgramNode):
 
     def _base_node_init(self, token: str, 
                         is_root: bool, num_children: int, 
-                        possible_children: dict[int, list[Type[SyncProgramNode]]],
+                        possible_children_dict: dict[int, list[Type[SyncProgramNode]]],
                         child_probs: dict[int, list[float]] = None,
                         label: str = None):
         
@@ -19,7 +19,7 @@ class NonTerminalNode(SyncProgramNode):
             is_terminal=False,
             is_root=is_root,
             num_children=num_children,
-            possible_children_dict=possible_children,
+            possible_children_dict=possible_children_dict,
             special_child_probs=child_probs,
             label=label
         )

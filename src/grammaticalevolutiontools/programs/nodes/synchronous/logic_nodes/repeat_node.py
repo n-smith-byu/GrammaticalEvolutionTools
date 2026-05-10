@@ -14,7 +14,7 @@ class RepeatNode(NonTerminalNode):
             label=label, 
             is_root=False,
             num_children=2, 
-            possible_children={0:possible_numbers,
+            possible_children_dict={0:possible_numbers,
                                1:possible_child_types})
 
     def _custom_init(self):

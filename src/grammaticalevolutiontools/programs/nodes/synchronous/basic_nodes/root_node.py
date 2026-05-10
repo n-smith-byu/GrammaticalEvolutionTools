@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class RootNode(NonTerminalNode):    
 
     def _base_node_init(self, token: str, 
-                        possible_children: list[Type['SyncProgramNode']],
+                        possible_children_list: list[Type['SyncProgramNode']],
                         child_probs: list[float] = None, 
                         label: str = None):
         
@@ -17,7 +17,7 @@ class RootNode(NonTerminalNode):
             label=label, 
             is_root=True, 
             num_children=1, 
-            possible_children={0: possible_children},
+            possible_children_dict={0: possible_children_list},
             child_probs={0: child_probs}
         )
 

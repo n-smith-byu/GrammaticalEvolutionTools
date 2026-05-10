@@ -70,7 +70,7 @@ class BasicWorld(World):
 class CodeNode(RootNode):
     def _base_node_init(self):
         super()._base_node_init(token='<Code>', 
-                                possible_children = [MidNode])
+                                possible_children_list = [MidNode])
     def _custom_init(self):
         return super()._custom_init()
 

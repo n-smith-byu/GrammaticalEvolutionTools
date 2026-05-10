@@ -18,7 +18,7 @@ with Grammar() as grammar:
         def _base_node_init(self):
             return super()._base_node_init(
                 token='<Root>',
-                possible_children=['MySeqNode', 'MyConditionNode'])
+                possible_children_list=['MySeqNode', 'MyConditionNode'])
         
     @as_grammar_node
     class MySeqNode(SequentialNode):

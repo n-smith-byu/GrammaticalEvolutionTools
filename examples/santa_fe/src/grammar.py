@@ -29,7 +29,7 @@ with Grammar(target_agent_type=SantaFeAgent) as SantaFeGrammar:
     class CodeNode(basic_nodes.RootNode):
         def _base_node_init(self):
             super()._base_node_init(token="<Code>",
-                                    possible_children=[
+                                    possible_children_list=[
                                         'ProgsNode'
                                     ])
             

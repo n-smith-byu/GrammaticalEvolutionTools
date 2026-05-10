@@ -37,7 +37,7 @@ class ConditionNode(NonTerminalNode):
             label=label,
             is_root=False,
             num_children=len(possible_children),
-            possible_children=possible_children,
+            possible_children_dict=possible_children,
             child_probs=child_probs
         )
         
