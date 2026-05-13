@@ -1,7 +1,7 @@
 # Grammatical Evolution Tools
 
 [![Python Version](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/Version-1.1.0a1-blue)](https://github.com/n-smith-byu/GrammaticalEvolutionTools)
+![PyPI](https://img.shields.io/pypi/v/GrammaticalEvolutionTools)
 [![GitHub License](https://img.shields.io/badge/License-MIT-green)](https://github.com/n-smith-byu/GrammaticalEvolutionTools/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-under--construction-yellow)](https://img.shields.io/badge/docs-under--construction-yellow)
 ![Tests](https://img.shields.io/badge/tests-under--construction-yellow)
@@ -12,12 +12,13 @@
 ## Table of Contents
 * [Introduction](#introduction)
 * [Features](#features)
+    * [Currently Available](#currently-available)
+    * [Coming Soon](#coming-soon) 
 * [Installation](#installation)
     * [Prerequisites](#prerequisites)
     * [Core Package](#core-package)
     * [For Notebooks and Examples](#for-notebooks-and-examples)
     * [For Development](#for-development)
-* [Quick Start / Usage](#quick-start--usage)
 * [Examples](#examples)
 * [Running Tests](#running-tests)
 * [Documentation](#documentation)
@@ -80,7 +81,7 @@ cd getools
 poetry install
 ```
 
-### To Run Notebooks and Examples
+### For Notebooks and Examples
 
 If you plan to explore the provided examples or run the Jupyter notebooks, you'll need to install the package with the `examples` dependency group.
 
