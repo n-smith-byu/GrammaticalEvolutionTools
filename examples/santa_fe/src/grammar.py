@@ -1,6 +1,6 @@
-from grammaticalevolutiontools.programs.nodes import \
+from getools.programs.nodes import \
     basic_nodes, logic_nodes, factor_nodes
-from grammaticalevolutiontools.grammars import \
+from getools.grammars import \
     Grammar, as_grammar_node
 
 from .santafe_agent import SantaFeAgent
@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from grammaticalevolutiontools.agents import AgentProgramTree
+    from getools.agents import AgentProgramTree
 
 _MIN_SIGHT_RANGE = 1
 _MAX_SIGHT_RANGE = 1

@@ -1,4 +1,4 @@
 Grammars
 ========
 
-:h2code:`grammaticalevolutiontools.grammars`
+:h2code:`getools.grammars`

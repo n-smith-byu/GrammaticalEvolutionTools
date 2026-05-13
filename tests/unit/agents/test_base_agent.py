@@ -1,5 +1,5 @@
-# from grammaticalevolutiontools.programs import ProgramTree
-# from grammaticalevolutiontools.agents import Agent
+# from getools.programs import ProgramTree
+# from getools.agents import Agent
 
 # import pytest
 # import conftests as fx

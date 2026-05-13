@@ -1,4 +1,4 @@
 Evolution
 =========
 
-:h2code:`grammaticalevolutiontools.evolution`
+:h2code:`getools.evolution`

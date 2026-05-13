@@ -1,5 +1,5 @@
-from grammaticalevolutiontools.meta import BaseNodeMeta, InheritingNodeMeta
-from grammaticalevolutiontools.meta import BaseNode
+from getools.meta import BaseNodeMeta, InheritingNodeMeta
+from getools.meta import BaseNode
 
 from abc import abstractmethod
 

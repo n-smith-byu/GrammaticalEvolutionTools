@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.programs import ProgramNode
+from getools.programs import ProgramNode
 
 from abc import abstractmethod
 

@@ -1,9 +1,9 @@
 Programs
 ========
 
-:h2code:`grammaticalevolutiontools.programs`
+:h2code:`getools.programs`
 
-.. automodule:: grammaticalevolutiontools.programs
+.. automodule:: getools.programs
    :no-members:
    :no-undoc-members:
    :no-inherited-members:
@@ -14,27 +14,27 @@ Programs
    
 ``ProgramTree``
 
-.. autoclass:: grammaticalevolutiontools.programs.ProgramTree
+.. autoclass:: getools.programs.ProgramTree
    
    .. rubric:: Exceptions
 
-   .. autoexception:: grammaticalevolutiontools.programs.ProgramTree.ProgramInProgressError
-   .. autoexception:: grammaticalevolutiontools.programs.ProgramTree.NodeMissingChildError
-   .. autoexception:: grammaticalevolutiontools.programs.ProgramTree.MissingAgentError
-   .. autoexception:: grammaticalevolutiontools.programs.ProgramTree.BoundToAgentError
+   .. autoexception:: getools.programs.ProgramTree.ProgramInProgressError
+   .. autoexception:: getools.programs.ProgramTree.NodeMissingChildError
+   .. autoexception:: getools.programs.ProgramTree.MissingAgentError
+   .. autoexception:: getools.programs.ProgramTree.BoundToAgentError
 
    .. rubric:: Properties
 
-   .. autoattribute:: grammaticalevolutiontools.programs.ProgramTree.status
-   .. autoattribute:: grammaticalevolutiontools.programs.ProgramTree.root
+   .. autoattribute:: getools.programs.ProgramTree.status
+   .. autoattribute:: getools.programs.ProgramTree.root
       :no-value:
 
    .. rubric:: Methods
 
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree.__init__
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree._set_agent
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree._collect_nodes
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree._fill_out_program
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree.get_nodes_by_type
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree.get_parent_of_node
-   .. automethod:: grammaticalevolutiontools.programs.ProgramTree.__str__
+   .. automethod:: getools.programs.ProgramTree.__init__
+   .. automethod:: getools.programs.ProgramTree._set_agent
+   .. automethod:: getools.programs.ProgramTree._collect_nodes
+   .. automethod:: getools.programs.ProgramTree._fill_out_program
+   .. automethod:: getools.programs.ProgramTree.get_nodes_by_type
+   .. automethod:: getools.programs.ProgramTree.get_parent_of_node
+   .. automethod:: getools.programs.ProgramTree.__str__

@@ -1,26 +1,26 @@
 Meta
 =====
 
-:h2code:`grammaticalevolutiontools.meta`
+:h2code:`getools.meta`
 
 ``BaseNodeMeta``
 
-.. autoclass:: grammaticalevolutiontools.BaseNodeMeta
-   :canonical: grammaticalevolutiontools._core.BaseNodeMeta
+.. autoclass:: getools.BaseNodeMeta
+   :canonical: getools._core.BaseNodeMeta
    :members:
    :private-members:
 
 ``InheritingNodeMeta``
 
-.. autoclass:: grammaticalevolutiontools.InheritingNodeMeta
-   :canonical: grammaticalevolutiontools._core.InheritingNodeMeta
+.. autoclass:: getools.InheritingNodeMeta
+   :canonical: getools._core.InheritingNodeMeta
    :show-inheritance:
    :members:
    :private-members:
 
 ``BaseNode``
 
-.. autoclass:: grammaticalevolutiontools.BaseNode
-   :canonical: grammaticalevolutiontools._core.BaseNode
+.. autoclass:: getools.BaseNode
+   :canonical: getools._core.BaseNode
    :members:
    :private-members:

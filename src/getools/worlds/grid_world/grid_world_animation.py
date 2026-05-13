@@ -12,7 +12,7 @@ from typing import Union, Type, Tuple, TYPE_CHECKING
 from collections import defaultdict
 
 if TYPE_CHECKING:
-    from grammaticalevolutiontools.worlds.grid_world import \
+    from getools.worlds.grid_world import \
         GridWorld, GridWorldObject
 
 

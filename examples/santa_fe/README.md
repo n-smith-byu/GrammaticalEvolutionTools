@@ -2,14 +2,14 @@
 __________________________________
 This is an implementation of the Santa Fe Problem for demontration purposes.
 In ```src/``` you will find four files showing how to use the abstract classes 
-provided in the ```grammaticalevolutiontools``` package to easily define a
+provided in the ```getools``` package to easily define a
 ```World```, ``Grammar``, and ``Agent`` for Santa Fe. 
 
 ## Files
 
 ### ```src/santafe_world.py```
 This file shows how to use the provided ```GridWorld``` from
-```grammaticalevolutiontools.worlds.grid_world``` to implement a ```SantaFeWorld```, 
+```getools.worlds.grid_world``` to implement a ```SantaFeWorld```, 
 which reads the santa fe trail layout from ```resources/GRID.txt```. Feel free
 to edit the size of the map or locations of the *#'s* which indicate the location of
 the food in the world, and see how the location of the food is automatically 
@@ -17,7 +17,7 @@ updated in ```SantaFeWorld```.
 
 ### ```src/santafe_agent.py```
 This file shows how to customize ```GridAgent``` from 
-```grammaticalevolutiontools.worlds.grid_world``` to create an agent specifically 
+```getools.worlds.grid_world``` to create an agent specifically 
 designed for out Santa Fe World. Besides the basic commands available in 
 ```GridWorldAgent``` like ```turn_left```, ```turn_right```, and ```move_forward```, 
 the SantaFeAgent also adds a command to check if there is food ahead. 
@@ -35,7 +35,7 @@ the World upon agent interaction.
 This file defines the ```Grammar``` used by the ```SantaFeAgent``` class to create
 programs. Notice ```SantaFeGrammar``` is not a subclass of ```Grammar``` but rather an instance.
 Nodes are defined in the ```SantaFeGrammar``` context using the predefined, abstract 
-classes of ```ProgramNode``` found in ```grammaticalevolutiontools.programs.nodes```. 
+classes of ```ProgramNode``` found in ```getools.programs.nodes```. 
 While these are subclasses of ```ProgramNode```, the ```@as_grammar_node``` decorator 
 creates a new class and converts them to subclasses of ```GrammarNode```. This allows 
 us to easily create custom subclasses of ```ProgramNode```, keep their hierarchy, and 
@@ -53,6 +53,6 @@ This is a jupyter notebook that shows how the ```SantaFeWorld```, ```SantaFeAgen
 ```SantaFeFood``` classes, along with the ```SantaFeGrammar```, are all used together
 in a simple grammatical evolution task. It demonstates how to build a simple
 genetic algorithm using the existing tools for cross-over and mutation found
-in ```grammaticalevolutiontools.evolution```, that work with the ```AgentProgram``` class. 
+in ```getools.evolution```, that work with the ```AgentProgram``` class. 
 It also shows how to automatically record a simulation, and create a 
 customizable ```WorldAnimation``` object for a ```GridWorld``` subclass. 

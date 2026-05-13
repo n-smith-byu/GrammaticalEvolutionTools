@@ -1,5 +1,5 @@
-from grammaticalevolutiontools.grammars import Grammar
-from grammaticalevolutiontools.grammars import GrammarNode
+from getools.grammars import Grammar
+from getools.grammars import GrammarNode
 
 import warnings
 

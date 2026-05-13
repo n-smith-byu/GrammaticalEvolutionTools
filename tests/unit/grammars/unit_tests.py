@@ -1,10 +1,10 @@
-from grammaticalevolutiontools.programs.nodes import ProgramNode
-from grammaticalevolutiontools.programs.nodes.basic_nodes import RootNode
-from grammaticalevolutiontools.programs.nodes.logic_nodes import \
+from getools.programs.nodes import ProgramNode
+from getools.programs.nodes.basic_nodes import RootNode
+from getools.programs.nodes.logic_nodes import \
     SequentialNode, ConditionNode
-from grammaticalevolutiontools.programs.nodes.factor_nodes import \
+from getools.programs.nodes.factor_nodes import \
     RandIntegerNode, IntegerNode
-from grammaticalevolutiontools.grammars import Grammar, \
+from getools.grammars import Grammar, \
     GrammarNode, as_grammar_node
 
 import unittest

@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.worlds.grid_world import \
+from getools.worlds.grid_world import \
     GridWorld, GridLayout, GridPosition
 from .santafe_agent import SantaFeAgent
 from .santafe_food import SantaFeFood

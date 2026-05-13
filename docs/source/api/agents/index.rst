@@ -1,4 +1,4 @@
 Agents
 ======
 
-:h2code:`grammaticalevolutiontools.agents`
+:h2code:`getools.agents`

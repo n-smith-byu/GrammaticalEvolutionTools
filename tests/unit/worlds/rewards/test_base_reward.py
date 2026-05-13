@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.worlds.base.objects.mixins.reward import RewardObjectMixin
+from getools.worlds.base.objects.mixins.reward import RewardObjectMixin
 from ...utilities_ import BasicWorld as bw
 
 import pytest

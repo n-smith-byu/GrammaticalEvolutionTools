@@ -1,11 +1,11 @@
-from grammaticalevolutiontools.programs.nodes import ProgramNode
-from grammaticalevolutiontools.programs.nodes.basic_nodes import \
+from getools.programs.nodes import ProgramNode
+from getools.programs.nodes.basic_nodes import \
     RootNode
-from grammaticalevolutiontools.programs.nodes.logic_nodes import \
+from getools.programs.nodes.logic_nodes import \
     SequentialNode, ConditionNode
-from grammaticalevolutiontools.programs.nodes.factor_nodes import \
+from getools.programs.nodes.factor_nodes import \
     RandIntegerNode, IntegerNode
-from grammaticalevolutiontools.grammars import Grammar, \
+from getools.grammars import Grammar, \
     GrammarNode, as_grammar_node
 
 import numpy as np
@@ -109,7 +109,7 @@ with Grammar() as grammar:
 
 # - - TESTS - - 
 
-PATH_TO_RANDINT_MODULE = 'grammaticalevolutiontools.programs.nodes.factor_nodes.rand_int_node.random.randint'
+PATH_TO_RANDINT_MODULE = 'getools.programs.nodes.factor_nodes.rand_int_node.random.randint'
     
 def test_class_level_properties_correct():
     assert MyRootNode._ORIGINAL_NODE_CLS is not None

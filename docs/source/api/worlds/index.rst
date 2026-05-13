@@ -1,5 +1,5 @@
 Worlds
 ======
 
-:h2code:`grammaticalevolutiontools.worlds`
+:h2code:`getools.worlds`
 

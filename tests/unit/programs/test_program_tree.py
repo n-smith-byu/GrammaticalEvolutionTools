@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.programs import ProgramTree, ProgramNode
+from getools.programs import ProgramTree, ProgramNode
 
 import pytest
 

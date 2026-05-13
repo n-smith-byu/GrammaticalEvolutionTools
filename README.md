@@ -1,7 +1,7 @@
 # Grammatical Evolution Tools
 
 [![Python Version](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/Version-1.1.0-blue)](https://github.com/n-smith-byu/grammaticalevolutiontools)
+[![Version](https://img.shields.io/badge/Version-1.1.0a1-blue)](https://github.com/n-smith-byu/GrammaticalEvolutionTools)
 [![GitHub License](https://img.shields.io/badge/License-MIT-green)](https://github.com/n-smith-byu/GrammaticalEvolutionTools/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-under--construction-yellow)](https://img.shields.io/badge/docs-under--construction-yellow)
 ![Tests](https://img.shields.io/badge/tests-under--construction-yellow)
@@ -27,9 +27,9 @@
 
 ## Introduction
 
-`grammaticalevolutiontools` is a Python package designed to simplify the setup and execution of Grammatical Evolution (GE) and other Agent-Based Modeling (ABM) projects. It provides a suite of tools for quickly spinning up worlds, defining grammars, setting up agents, and running and animating simulations. It includes a number of abstract classes you can easily inherit from and customize, with much of the underlying functionality already implemented.
+`GrammaticalEvolutionTools` is a Python package designed to simplify the setup and execution of Grammatical Evolution (GE) and other Agent-Based Modeling (ABM) projects. It provides a suite of tools for quickly spinning up worlds, defining grammars, setting up agents, and running and animating simulations. It includes a number of abstract classes you can easily inherit from and customize, with much of the underlying functionality already implemented.
 
-Whether you're building complex simulation environments or simple test cases, `grammaticalevolutiontools` streamlines the boilerplate, enabling faster iteration and more effective research in grammatical evolution.
+Whether you're building complex simulation environments or simple test cases, `getools` streamlines the boilerplate, enabling faster iteration and more effective research in grammatical evolution.
 
 *Note: This project is still in development. Code has been refactored and not all docstrings may reflect this yet.*
 
@@ -73,8 +73,8 @@ To install the core package with only its essential dependencies (for integratin
 
 ```bash
 # Clone the repository first
-git clone [https://github.com/n-smith-byu/grammaticalevolutiontools.git](https://github.com/n-smith-byu/grammaticalevolutiontools.git)
-cd grammaticalevolutiontools
+git clone [https://github.com/n-smith-byu/getools.git](https://github.com/n-smith-byu/GrammaticalEvolutionTools.git)
+cd getools
 
 # Install the core package in editable mode
 poetry install
@@ -86,8 +86,8 @@ If you plan to explore the provided examples or run the Jupyter notebooks, you'l
 
 ```bash
 # If you haven't already, clone the repository and navigate into it
-# git clone [https://github.com/n-smith-byu/grammaticalevolutiontools.git](https://github.com/n-smith-byu/grammaticalevolutiontools.git)
-# cd grammaticalevolutiontools
+# git clone [https://github.com/n-smith-byu/getools.git](https://github.com/n-smith-byu/GrammaticalEvolutionTools.git)
+# cd getools
 
 # Install the package with examples dependencies
 poetry install --with examples
@@ -99,8 +99,8 @@ If you intend to modify the code, run tests, or build the documentation, install
 
 ```bash
 # If you haven't already, clone the repository and navigate into it
-# git clone [https://github.com/n-smith-byu/grammaticalevolutiontools.git](https://github.com/n-smith-byu/grammaticalevolutiontools.git)
-# cd grammaticalevolutiontools
+# git clone [https://github.com/n-smith-byu/getools.git](https://github.com/n-smith-byu/GrammaticalEvolutionTools.git)
+# cd getools
 
 # Install in editable mode with dev dependencies
 poetry install --with dev
@@ -110,7 +110,7 @@ poetry install --with dev
 
 ## Examples
 
-The `examples/` directory in this repository contains various Jupyter notebooks and scripts demonstrating how to use `grammaticalevolutiontools` for different scenarios.
+The `examples/` directory in this repository contains various Jupyter notebooks and scripts demonstrating how to use `getools` for different scenarios.
 
 To run these examples, make sure you have installed the package with the `examples` dependency group:
 

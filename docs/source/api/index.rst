@@ -1,7 +1,7 @@
 API Reference
 =============
 
-``grammaticalevolutiontools``
+``getools``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::

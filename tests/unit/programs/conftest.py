@@ -1,3 +1,3 @@
-from grammaticalevolutiontools.programs.nodes import *
+from getools.programs.nodes import *
 
 import pytest

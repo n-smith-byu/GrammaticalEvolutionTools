@@ -1,11 +1,11 @@
-from grammaticalevolutiontools.worlds.base import WorldLayout
-from grammaticalevolutiontools.worlds.base import WorldObject
-from grammaticalevolutiontools.worlds import World
-from grammaticalevolutiontools.agents import Agent
+from getools.worlds.base import WorldLayout
+from getools.worlds.base import WorldObject
+from getools.worlds import World
+from getools.agents import Agent
 
-from grammaticalevolutiontools.programs.nodes.basic_nodes import ExecutableNode, RootNode
-from grammaticalevolutiontools.programs.nodes.logic_nodes import SequentialNode
-from grammaticalevolutiontools.grammars import Grammar
+from getools.programs.nodes.basic_nodes import ExecutableNode, RootNode
+from getools.programs.nodes.logic_nodes import SequentialNode
+from getools.grammars import Grammar
 
 
 import pytest

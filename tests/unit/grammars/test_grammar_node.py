@@ -1,5 +1,5 @@
-from grammaticalevolutiontools.grammars import Grammar
-from grammaticalevolutiontools.grammars import GrammarNode, OutOfContextError
+from getools.grammars import Grammar
+from getools.grammars import GrammarNode, OutOfContextError
 
 import numpy as np
 

@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.meta import BaseNode
+from getools.meta import BaseNode
 
 import numpy as np
 import pytest

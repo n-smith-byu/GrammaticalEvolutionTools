@@ -1,4 +1,4 @@
-from grammaticalevolutiontools.worlds.objects import WorldObject
+from getools.worlds.objects import WorldObject
 from ...utilities_ import BasicWorld as bw
 
 import pytest

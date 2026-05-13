@@ -1,9 +1,9 @@
 nodes
 =====
 
-``grammaticalevolutiontools.programs.nodes``
+``getools.programs.nodes``
 
-.. automodule:: grammaticalevolutiontools.programs.nodes
+.. automodule:: getools.programs.nodes
     :no-members:
     :noindex:
 
@@ -19,10 +19,10 @@ nodes
 ``ProgramNode``
 ^^^^^^^^^^^^^^^
 
-.. autoclass:: grammaticalevolutiontools.programs.nodes.ProgramNode
+.. autoclass:: getools.programs.nodes.ProgramNode
     :show-inheritance:
 
     .. rubric:: Methods
 
-    .. automethod:: grammaticalevolutiontools.programs.nodes.ProgramNode._base_node_init
-    .. automethod:: grammaticalevolutiontools.programs.nodes.ProgramNode._custom_init
+    .. automethod:: getools.programs.nodes.ProgramNode._base_node_init
+    .. automethod:: getools.programs.nodes.ProgramNode._custom_init
