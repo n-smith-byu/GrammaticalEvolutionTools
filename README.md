@@ -1,13 +1,11 @@
 # Grammatical Evolution Tools
 
-[![Python Version](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/downloads/)
-![PyPI](https://img.shields.io/pypi/v/GrammaticalEvolutionTools)
+[![Python Version](https://img.shields.io/badge/python-3.13+-blue)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/GrammaticalEvolutionTools)](https://pypi.org/project/GrammaticalEvolutionTools/)
 [![GitHub License](https://img.shields.io/badge/License-MIT-green)](https://github.com/n-smith-byu/GrammaticalEvolutionTools/blob/main/LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-under--construction-yellow)](https://img.shields.io/badge/docs-under--construction-yellow)
-![Tests](https://img.shields.io/badge/tests-under--construction-yellow)
+![Docs](https://img.shields.io/badge/docs-coming--soon-yellow)
+![Tests](https://img.shields.io/badge/tests-in--development-yellow)
 
-
----
 
 ## Table of Contents
 * [Introduction](#introduction)
@@ -15,10 +13,12 @@
     * [Currently Available](#currently-available)
     * [Coming Soon](#coming-soon) 
 * [Installation](#installation)
-    * [Prerequisites](#prerequisites)
-    * [Core Package](#core-package)
-    * [For Notebooks and Examples](#for-notebooks-and-examples)
-    * [For Development](#for-development)
+    * [PyPI](#pypi)
+    * [Local Development](#local-development)
+        * [Prerequisites](#prerequisites)
+        * [Core Package](#core-package)
+        * [For Notebooks and Examples](#for-notebooks-and-examples)
+        * [For Development](#for-development-tests-and-docs)
 * [Examples](#examples)
 * [Running Tests](#running-tests)
 * [Documentation](#documentation)
@@ -48,9 +48,32 @@ Whether you're building complex simulation environments or simple test cases, `g
 
 ## Installation
 
-Since this package is not yet published to PyPI, you will need to clone the repository and install it locally.
+### PyPI
 
-### Prerequisites
+This package is available on PyPI. You can install it with:
+```bash
+pip install GrammaticalEvolutionTools
+```
+
+For pre-releases, you may need to specify the version:
+```bash
+pip install GrammaticalEvolutionTools==<VERSION>
+```
+
+After installation:
+
+```python
+import getools
+
+from getools.worlds.grid_world import GridWorld
+from getools.grammars import Grammar
+...
+world = GridWorld(...)
+```
+
+### Local Development
+
+#### Prerequisites
 
 This project uses [Poetry](https://python-poetry.org/) for dependency management and packaging. Before installing the package, ensure you have Poetry installed on your system.
 
@@ -67,42 +90,35 @@ pipx install poetry
 
 You can find more detailed installation instructions for Poetry on their official website: [Poetry Installation Guide](https://python-poetry.org/docs/#installation)
 
+---
 
-### Core Package
+#### Core Package
 
 To install the core package with only its essential dependencies (for integrating it into your own projects):
 
 ```bash
-# Clone the repository first
-git clone [https://github.com/n-smith-byu/getools.git](https://github.com/n-smith-byu/GrammaticalEvolutionTools.git)
-cd getools
+# Clone the repository
+git clone https://github.com/n-smith-byu/GrammaticalEvolutionTools.git
+cd GrammaticalEvolutionTools
 
-# Install the core package in editable mode
+# Install the core package
 poetry install
 ```
 
-### For Notebooks and Examples
+#### For Notebooks and Examples
 
 If you plan to explore the provided examples or run the Jupyter notebooks, you'll need to install the package with the `examples` dependency group.
 
 ```bash
-# If you haven't already, clone the repository and navigate into it
-# git clone [https://github.com/n-smith-byu/getools.git](https://github.com/n-smith-byu/GrammaticalEvolutionTools.git)
-# cd getools
-
 # Install the package with examples dependencies
 poetry install --with examples
 ```
 
-### For Development
+#### For Development (Tests and Docs)
 
 If you intend to modify the code, run tests, or build the documentation, install with the `dev` dependency group.
 
 ```bash
-# If you haven't already, clone the repository and navigate into it
-# git clone [https://github.com/n-smith-byu/getools.git](https://github.com/n-smith-byu/GrammaticalEvolutionTools.git)
-# cd getools
-
 # Install in editable mode with dev dependencies
 poetry install --with dev
 ```
@@ -171,3 +187,4 @@ This project is licensed under the [MIT License](https://github.com/n-smith-byu/
 
 
 ---
+
