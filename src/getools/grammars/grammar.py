@@ -18,7 +18,7 @@ class Grammar:
 
     current_grammar = None
 
-    def __init__(self, target_agent_type: Type[Agent] = None, 
+    def __init__(self, target_agent_type: 'Type[Agent]' = None, 
                  warnings=True):
         self._roots: list[Type[GrammarNode]] = []
         self._all_node_classes: dict[str, Type[GrammarNode]] = {}
@@ -136,5 +136,5 @@ class Grammar:
         return self._concrete_types.copy()   
     
     @property
-    def target_agent_type(self) -> Type[Agent]:
+    def target_agent_type(self) -> 'Type[Agent]':
         return self._target_agent_type

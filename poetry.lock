@@ -95,7 +95,10 @@ files = [
 ]
 
 [package.dependencies]
-cffi = {version = ">=2.0.0b1", markers = "python_version >= \"3.14\""}
+cffi = [
+    {version = ">=1.0.1", markers = "python_version < \"3.14\""},
+    {version = ">=2.0.0b1", markers = "python_version >= \"3.14\""},
+]
 
 [[package]]
 name = "arrow"
@@ -3443,5 +3446,5 @@ files = [
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.14"
-content-hash = "6d5cce3e607541332dda870c39aafcbad56efbfb19b7cb9c21ed158bca06f5ee"
+python-versions = ">=3.13,<4.0"
+content-hash = "343e633f0b0c73b284a3f71edad46e271e8fd4bbc89ee029c91d169e6d4ca0d7"
