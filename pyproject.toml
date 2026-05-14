@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "GrammaticalEvolutionTools"
-version = "1.1.0a2"
+version = "1.1.0.dev3"
 description = "This package contains several tools for quickly setting up worlds and agents for Grammatical Evolution Projects."
 authors = ["Nick Smith <nicholas.smith0014@gmail.com>"]
 license = "MIT"
