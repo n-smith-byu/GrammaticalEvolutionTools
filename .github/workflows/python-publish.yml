@@ -28,11 +28,23 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
-      - name: Set version from git tag
+      - name: Set version and Commit
         run: |
           TAG=${GITHUB_REF#refs/tags/}
           VERSION=${TAG#v}
           poetry version "$VERSION"
+          
+          # Configure git to use the GitHub Actions bot identity
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage the change and commit
+          git add pyproject.toml
+          git commit -m "chore: bump version to $VERSION on release [skip ci]"
+          
+          # Push the change back to the main branch
+          # (Assuming your default branch is 'main')
+          git push origin HEAD:main
 
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
